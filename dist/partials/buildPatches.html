@@ -1,0 +1,53 @@
+<style>
+    .patch-plugin-item {
+        padding: 2px;
+    }
+
+    .patch-plugin-item button:first-of-type {
+        margin-left: -4px;
+        margin-right: -2px;
+    }
+
+    .patch-plugin-item > input {
+        padding: 2px;
+        margin: 8px;
+        background: none;
+        border: none;
+    }
+
+    .patch-plugin-item list-view {
+        display: block;
+        padding-left: 20px;
+    }
+
+    .list-item {
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+    }
+
+    .list-item input {
+        margin-right: 5px;
+    }
+
+    .files-to-patch {
+        margin-left: 4px;
+    }
+</style>
+
+<h2>Build Patches</h2>
+
+<section>
+    <div ng-repeat="patchPlugin in patchPlugins" class="patch-plugin-item">
+        <input type="text" ng-model="patchPlugin.filename" ng-change="patchFileNameChanged(patchPlugin)" />
+        <button class="action-btn small" ng-click="buildPatchPlugin(patchPlugin)">Build</button>
+        <button class="action-btn small negative" ng-click="removePatchPlugin($index)">Delete</button>
+        <list-view items="patchPlugin.patchers" drag-type="patcher">
+            <input type="checkbox" ng-model="$parent.item.active" ng-change="patcherToggled($parent.item)"/>
+            {{::$parent.item.name}}
+            <span class="files-to-patch" title="{{$parent.item.filesToPatchHint}}">
+                (Patching {{$parent.item.filesToPatch.length}} files)
+            </span>
+        </list-view>
+    </div>
+</section>
