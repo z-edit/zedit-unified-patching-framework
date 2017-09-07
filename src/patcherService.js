@@ -92,9 +92,9 @@ ngapp.service('patcherService', function(settingsService) {
         if (patcher.getDefaultFilesToPatch) {
             return patcher.getDefaultFilesToPatch();
         } else {
-            let defaultFilesToPatch = xelib.GetLoadedFileNames();
-            defaultFilesToPatch.remove('Skyrim.Hardcoded.dat');
-            return defaultFilesToPatch;
+            return xelib.GetLoadedFileNames().filter(function(filename) {
+                return !filename.endsWith('.Hardcoded.dat');
+            });
         }
     };
 
