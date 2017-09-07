@@ -71,7 +71,7 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
     };
 
     $scope.addPatchPlugin = function() {
-        $scope.patchPlugins.push({ filename: getNewPatchFilename() });
+        $scope.patchPlugins.push({ filename: getNewPatchFilename(), patchers: [] });
     };
 
     $scope.removePatchPlugin = (index) => $scope.patchPlugins.splice(index, 1);
