@@ -33,6 +33,16 @@
     .files-to-patch {
         margin-left: 4px;
     }
+
+    .placeholder::before {
+        content: 'This patch plugin has no patchers.';
+        font-size: 13px;
+        padding-left: 10px;
+    }
+
+    section {
+        user-select: none;
+    }
 </style>
 
 <h2>Build Patches</h2>
