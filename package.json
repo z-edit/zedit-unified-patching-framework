@@ -1,0 +1,18 @@
+{
+  "name": "zedit-unified-patching-framework",
+  "productName": "Unified Patching Framework",
+  "description": "A zEdit module which provides a framework for dynamic patch generation, similar to SkyProc/SUM.",
+  "version": "1.0.0",
+  "author": "Mator",
+  "copyright": "© 2017, Mator",
+  "repository": "https://github.com/matortheeternal/zedit-unified-patching-framework",
+  "license": "MIT",
+  "scripts": {
+    "build": "gulp build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-include": "^2.3.1"
+  }
+}
