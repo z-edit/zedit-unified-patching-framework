@@ -91,6 +91,7 @@ ngapp.service('patchBuilder', function(patcherService) {
     };
 
     this.cleanPatchFile = function(patchFile) {
+        xelib.RemoveIdenticalRecords(patchFile);
         xelib.CleanMasters(patchFile);
     };
 
