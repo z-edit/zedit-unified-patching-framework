@@ -70,7 +70,7 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
     $scope.updatePatchStatuses = function() {
         $scope.patchPlugins.forEach(function(patch) {
             patch.disabled = patch.patchers.reduce(function(b, patcher) {
-                return b || !patcher.active;
+                return b || !patcher.active || patcher.filename.length === 0;
             }, false) || !patch.patchers.length;
         });
     };
