@@ -138,7 +138,4 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
         return patchPlugins;
     };
-
-    // event handlers
-    $rootScope.$on('filesLoaded', service.loadSettings);
 });

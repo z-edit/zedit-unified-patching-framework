@@ -34,3 +34,7 @@ ngapp.run(function(settingsService) {
         controller: 'upfSettingsController'
     });
 });
+
+ngapp.run(function($rootScope, patcherService) {
+    $rootScope.$on('filesLoaded', patcherService.loadSettings);
+});
