@@ -12,9 +12,9 @@ ngapp.directive('ignorePlugins', function() {
 ngapp.controller('ignorePluginsController', function($scope, patcherService) {
     // helper functions
     let updateIgnoredFiles = function() {
-        patcherSettings.ignoredFiles = $scope.ignoredPlugins.
-            filter((item) => { return !item.invalid; }).
-            map((item) => { return item.filename; });
+        patcherSettings.ignoredFiles = $scope.ignoredPlugins
+            .filter((item) => { return !item.invalid; })
+            .map((item) => { return item.filename; });
     };
 
     let getValid = function(item, itemIndex) {
