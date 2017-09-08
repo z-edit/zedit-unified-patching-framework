@@ -1,9 +1,13 @@
 var gulp = require('gulp'),
+    clean = require('gulp-clean'),
     include = require('gulp-include');
 
-gulp.task('build', function () {
-    console.log('-- gulp is running task "build"');
+gulp.task('clean', function() {
+    return gulp.src('dist', {read: false})
+        .pipe(clean());
+});
 
+gulp.task('build', ['clean'], function() {
     gulp.src('index.js')
         .pipe(include())
         .on('error', console.log)
