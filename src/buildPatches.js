@@ -16,6 +16,7 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
     let build = function(patchPlugin) {
         let patchFile = patchBuilder.preparePatchFile(patchPlugin.filename);
         patchPlugin.patchers.forEach(function(patcher) {
+            if (!patcher.active) return;
             patchBuilder.executePatcher($scope, patcher.id, patchFile);
         });
         patchBuilder.cleanPatchFile(patchFile);
