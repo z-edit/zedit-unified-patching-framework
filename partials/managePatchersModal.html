@@ -1,8 +1,6 @@
 <div class="modal-container" ng-click="unfocusModal($event)">
     <div class="modal tabs-modal" ng-click="$broadcast('parentClick', $event)" ng-keydown="$broadcast('keyDown', $event)" tabindex="0" autofocus>
-        <div class="close-modal">
-            <span class="fa fa-times" ng-click="closeModal()"></span>
-        </div>
+        <div class="close-modal" ng-click="closeModal()"></div>
 
         <div class="tabs-container">
             <div ng-repeat="tab in tabs" class="tab" ng-class="{'selected': tab.selected}" ng-click="onTabClick($event, tab)">
