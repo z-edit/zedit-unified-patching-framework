@@ -33,6 +33,10 @@ ngapp.run(function(settingsService) {
     });
 });
 
+// register for events
 ngapp.run(function($rootScope, patcherService) {
+    $rootScope.$on('sessionStarted', function(e, selectedProfile) {
+        patcherService.updateForGameMode(selectedProfile.gameMode);
+    });
     $rootScope.$on('filesLoaded', patcherService.loadSettings);
 });

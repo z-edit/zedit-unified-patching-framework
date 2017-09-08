@@ -49,6 +49,12 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return Object.deepAssign(defaults, settings);
     };
 
+    let buildTabs = function() {
+        patchers.forEach((patcher) => {
+            if (patcher.settings) tabs.push(patcher.settings);
+        });
+    };
+
     let getFilesToPatchHint = function(patcher) {
         let filesToPatch = patcher.filesToPatch,
             hint = filesToPatch.slice(0, 40).join(', ');
@@ -87,10 +93,14 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.registerPatcher = function(patcher) {
-        if (!!service.getPatcher(patcher.info.id)) return;
+        if (service.getPatcher(patcher.info.id)) return;
         patchers.push(patcher);
-        if (!patcher.settings) return;
-        tabs.push(patcher.settings);
+    };
+
+    this.updateForGameMode = function(gameMode) {
+        patchers = patchers.filter(function(patcher) {
+            return patcher.gameModes.includes(gameMode);
+        });
     };
 
     this.loadSettings = function() {
@@ -99,6 +109,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         let settings = fh.loadJsonFile(service.settingsPath, {});
         service.settings = buildSettings(settings);
         service.saveSettings();
+        buildTabs();
     };
 
     this.saveSettings = function() {
