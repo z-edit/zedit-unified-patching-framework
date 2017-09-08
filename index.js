@@ -6,9 +6,7 @@ const openManagePatchersModal = function(scope) {
     templateUrl: `${modulePath}/partials/managePatchersModal.html`
   });
 };
-
 //=require src/*.js
-
 // add manage patchers context menu item to tree view context menu
 ngapp.run(function(contextMenuFactory) {
     let menuItems = contextMenuFactory.mainTreeItems,

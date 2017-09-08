@@ -6,7 +6,6 @@ const openManagePatchersModal = function(scope) {
     templateUrl: `${modulePath}/partials/managePatchersModal.html`
   });
 };
-
 ngapp.controller('buildPatchesController', function($scope, patcherService, patchBuilder, errorService) {
     // helper functions
     let getNewPatchFilename = function() {
@@ -176,6 +175,7 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
     // initialize scope variables
     $scope.settings = patcherService.settings;
     $scope.tabs = patcherService.getTabs();
+    $scope.noPatchers = $scope.tabs.length === 1;
     selectTab($scope.tabs[0]);
 
     // scope functions
@@ -435,7 +435,6 @@ ngapp.controller('upfSettingsController', function($timeout, $scope) {
         $timeout(() => openManagePatchersModal($scope));
     };
 });
-
 // add manage patchers context menu item to tree view context menu
 ngapp.run(function(contextMenuFactory) {
     let menuItems = contextMenuFactory.mainTreeItems,

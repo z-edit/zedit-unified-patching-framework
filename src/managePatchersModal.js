@@ -13,6 +13,7 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
     // initialize scope variables
     $scope.settings = patcherService.settings;
     $scope.tabs = patcherService.getTabs();
+    $scope.noPatchers = $scope.tabs.length === 1;
     selectTab($scope.tabs[0]);
 
     // scope functions

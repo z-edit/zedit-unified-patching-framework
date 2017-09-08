@@ -2,7 +2,7 @@
   "id": "unifiedPatchingFramework",
   "name": "zEdit Unified Patching Framework",
   "author": "Mator",
-  "version": "0.2",
+  "version": "0.2.1",
   "released": "9/7/2017",
   "updated": "9/8/2017",
   "description": "A framework for dynamic patchers, similar to SkyProc/SUM."
