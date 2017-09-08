@@ -1,4 +1,4 @@
-ngapp.service('patcherService', function(settingsService) {
+ngapp.service('patcherService', function($rootScope, settingsService) {
     let service = this,
         patchers = [],
         tabs = [{
@@ -196,4 +196,6 @@ ngapp.service('patcherService', function(settingsService) {
     };
 
     this.clearCache = () => cache = {};
+    // event handlers
+    $rootScope.$on('filesLoaded', service.loadSettings);
 });
