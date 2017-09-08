@@ -428,9 +428,6 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
         return patchPlugins;
     };
-
-    // event handlers
-    $rootScope.$on('filesLoaded', service.loadSettings);
 });
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.managePatchers = function() {
@@ -463,4 +460,8 @@ ngapp.run(function(settingsService) {
         templateUrl: `${modulePath}/partials/settings.html`,
         controller: 'upfSettingsController'
     });
+});
+
+ngapp.run(function($rootScope, patcherService) {
+    $rootScope.$on('filesLoaded', patcherService.loadSettings);
 });
