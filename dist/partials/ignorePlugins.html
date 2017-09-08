@@ -1,0 +1,11 @@
+<span ng-click="toggleExpanded()">
+    <span class="expander {{expanded ? 'expanded' : 'collapsed'}}" ng-if="ignoredPlugins.length"></span>
+    Ignoring {{ignoredPlugins.length}} Plugins
+</span>
+<button class="action-btn small positive" ng-click="addIgnoredPlugin()">Add</button>
+<div ng-show="expanded" class="ignored-plugins-container">
+    <div ng-repeat="item in ignoredPlugins">
+        <input type="text" ng-model="item.filename" ng-class="{'invalid' : item.invalid}" ng-change="onChange()"/>
+        <span class="remove-item" ng-click="removeIgnoredPlugin($index)" title="Remove"></span>
+    </div>
+</div>
