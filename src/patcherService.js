@@ -3,133 +3,91 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         patchers = [],
         tabs = [{
             label: 'Build Patches',
-            templateUrl: `${modulePath}/partials/buildPatches.html`
-        }],
-        cache = {};
+            templateUrl: `${modulePath}/partials/buildPatches.html`,
+            controller: 'buildPatchesController'
+        }];
 
-    // helper functions
-    let getPatcherEnabled = function(patcherId) {
-        let settings = service.settings[patcherId];
-        return settings && settings.hasOwnProperty('enabled') ? settings.enabled : true;
+    // private functions
+    let getPatcherEnabled = function(patcher) {
+        return service.settings[patcher.info.id].enabled;
     };
 
-    let getPatcher = function(id) {
-        return patchers.find((patcher) => { return patcher.info.id === id; });
+    let getPatcherDisabled = function(patcher) {
+        let loadedFiles = xelib.GetLoadedFileNames(),
+            requiredFiles = patcher.requiredFiles || [];
+        return requiredFiles.subtract(loadedFiles).length > 0;
     };
 
-    let getOrCreatePatchPlugin = (fileName) => { return xelib.AddElement(0, fileName) };
-
-    let getOrCreatePatchRecord = function(patchPlugin, record) {
-        return xelib.AddElement(patchPlugin, xelib.HexFormID(record));
-    };
-
-    let getFile = function(filename) {
-        if (!cache[filename]) {
-            cache[filename] = { handle: xelib.FileByName(filename) };
-        }
-        return cache[filename];
-    };
-
-    let getRecords = function(filename, search, includeOverrides) {
-        let file = getFile(filename),
-            cacheKey = `${search}_${+includeOverrides}`;
-        if (!file[cacheKey]) {
-            file[cacheKey] = xelib.GetRecords(file.handle, search, includeOverrides);
-        }
-        return file[cacheKey];
-    };
-
-    let getPatcherHelpers = function(patcher) {
-        let patcherSettings = service.settings[patcher.info.id];
-        return {
-            LoadRecords: function(search, includeOverrides = false) {
-                return patcherSettings.filesToPatch.reduce(function(records, filename) {
-                    return records.concat(getRecords(filename, search, includeOverrides));
-                }, []);
-            },
-            AllSettings: service.settings
-            // TODO: More helpers here?
-        }
-    };
-
-    let addRequiredMastersToPatch = function(filename, patchPlugin) {
-        let plugin = getFile(filename);
-        xelib.GetMasterNames(plugin.handle).forEach(function(masterName) {
-            xelib.AddMaster(patchPlugin, masterName)
+    let getDisabledHint = function(patcher) {
+        let loadedFiles = xelib.GetLoadedFileNames(),
+            requiredFiles = patcher.requiredFiles || [],
+            hint = 'This patcher is disabled because the following required' +
+                '\r\nfiles are not loaded:';
+        requiredFiles.subtract(loadedFiles).forEach(function(filename) {
+            hint += `\r\n - ${filename}`;
         });
-        xelib.AddMaster(patchPlugin, filename);
-    };
-
-    let getRecordsToPatch = function(load, filename, settings, locals) {
-        let plugin = getFile(filename),
-            loadOpts = load(plugin.handle, settings, locals);
-        if (!loadOpts) return [];
-        let records = getRecords(filename, loadOpts.signature, false);
-        return loadOpts.filter ? records.filter(loadOpts.filter) : records;
-    };
-
-    let executeProcessBlock = function(processBlock, patchPlugin, settings, locals) {
-        let load = processBlock.load,
-            patch = processBlock.patch;
-        settings.filesToPatch.forEach(function(filename) {
-            let recordsToPatch = getRecordsToPatch(load, filename, settings, locals);
-            if (recordsToPatch.length === 0) return;
-            addRequiredMastersToPatch(filename, patchPlugin);
-            recordsToPatch.forEach(function(record) {
-                let patchRecord = getOrCreatePatchRecord(patchPlugin, record);
-                patch(patchRecord, settings, locals);
-            });
-        });
-    };
-
-    let getBaseDefaults = function(patcher) {
-        let baseDefaults = {};
-        baseDefaults[patcher.info.id] = { patchFileName: 'zPatch.esp' };
-        return baseDefaults;
-    };
-
-    let getFilesToPatch = function(patcher) {
-        if (patcher.getDefaultFilesToPatch) {
-            return patcher.getDefaultFilesToPatch();
-        } else {
-            return xelib.GetLoadedFileNames().filter(function(filename) {
-                return !filename.endsWith('.Hardcoded.dat');
-            });
-        }
+        return hint;
     };
 
     let getDefaultSettings = function(patcher) {
         let defaultSettings = patcher.settings.defaultSettings || {};
-        Object.deepAssign(defaultSettings, getBaseDefaults(patcher));
+        Object.deepAssign(defaultSettings, {
+            patchFileName: 'zPatch.esp',
+            ignoredFiles: [],
+            enabled: true
+        });
         return defaultSettings;
     };
 
     let buildSettings = function(settings) {
         let defaults = {};
         patchers.forEach(function(patcher) {
-            Object.deepAssign(defaults, getDefaultSettings(patcher));
+            let patcherSettings = {};
+            patcherSettings[patcher.info.id] = getDefaultSettings(patcher);
+            Object.deepAssign(defaults, patcherSettings);
         });
         return Object.deepAssign(defaults, settings);
     };
 
-    let getFilesToPatchHint = function(filesToPatch) {
-        let hint = filesToPatch.slice(0, 40).join(', ');
+    let getFilesToPatchHint = function(patcher) {
+        let filesToPatch = patcher.filesToPatch,
+            hint = filesToPatch.slice(0, 40).join(', ');
         if (filesToPatch.length > 40) hint += '...';
         return hint.wordwrap();
     };
 
-    let updateFilesToPatch = function() {
-        patchers.forEach(function(patcher) {
-            let patcherSettings = service.settings[patcher.info.id];
-            patcherSettings.filesToPatch = getFilesToPatch(patcher);
-        });
+    let getFilesToPatch = function(patcher) {
+        let patcherSettings = service.settings[patcher.info.id],
+            ignored = patcherSettings.ignoredFiles;
+            filesToPatch = xelib.GetLoadedFileNames().filter(function(filename) {
+                return !filename.endsWith('.Hardcoded.dat');
+            });
+        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
+        filesToPatch = filesToPatch.subtract(ignored);
+        return filesToPatch;
     };
 
-    // service functions
-    this.hasPatcher = (id) => { return !!getPatcher(id) };
+    let createPatchPlugin = function(patchPlugins, patchFileName) {
+        let patchPlugin = { filename: patchFileName, patchers: [] };
+        patchPlugins.push(patchPlugin);
+        return patchPlugin;
+    };
+
+    let getPatchPlugin = function(patcher, patchPlugins) {
+        let patcherSettings = service.settings[patcher.info.id],
+            patchFileName = patcherSettings.patchFileName;
+        return patchPlugins.find(function(patchPlugin) {
+            return patchPlugin.filename === patchFileName;
+        }) || createPatchPlugin(patchPlugins, patchFileName);
+    };
+
+    // public functions
+    this.getPatcher = function(id) {
+        return patchers.find((patcher) => { return patcher.info.id === id; });
+    };
 
     this.registerPatcher = function(patcher) {
-        if (service.hasPatcher(patcher.info.id)) return;
+        if (!!service.getPatcher(patcher.info.id)) return;
         patchers.push(patcher);
         if (!patcher.settings) return;
         tabs.push(patcher.settings);
@@ -140,7 +98,6 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         service.settingsPath = `profiles/${profileName}/patcherSettings.json`;
         let settings = fh.loadJsonFile(service.settingsPath, {});
         service.settings = buildSettings(settings);
-        updateFilesToPatch();
         service.saveSettings();
     };
 
@@ -158,44 +115,30 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
     };
 
+    this.updateFilesToPatch = function() {
+        patchers.forEach(function(patcher) {
+            patcher.filesToPatch = getFilesToPatch(patcher);
+        });
+    };
+
     this.getPatchPlugins = function() {
         let patchPlugins = [];
         patchers.forEach(function(patcher) {
-            let patcherSettings = service.settings[patcher.info.id],
-                patchPlugin = patchPlugins.find(function(patchPlugin) {
-                    return patchPlugin.filename === patcherSettings.patchFileName;
-                });
-            if (!patchPlugin) {
-                patchPlugin = { filename: patcherSettings.patchFileName, patchers: [] };
-                patchPlugins.push(patchPlugin);
-            }
+            let patchPlugin = getPatchPlugin(patcher, patchPlugins),
+                disabled = getPatcherDisabled(patcher);
             patchPlugin.patchers.push({
                 id: patcher.info.id,
                 name: patcher.info.name,
-                active: getPatcherEnabled(patcher.info.id),
-                filesToPatch: patcherSettings.filesToPatch,
-                filesToPatchHint: getFilesToPatchHint(patcherSettings.filesToPatch)
+                active: !disabled && getPatcherEnabled(patcher),
+                disabled: disabled,
+                disabledHint: disabled ? getDisabledHint(patcher) : '',
+                filesToPatch: patcher.filesToPatch,
+                filesToPatchHint: getFilesToPatchHint(patcher)
             });
         });
         return patchPlugins;
     };
 
-    this.executePatcher = function(scope, patcherId) {
-        let patcher = getPatcher(patcherId),
-            exec = patcher.execute,
-            settings = service.settings[patcherId],
-            patchPlugin = getOrCreatePatchPlugin(settings.patchFileName),
-            helpers = getPatcherHelpers(patcher),
-            locals = {};
-
-        exec.initialize && exec.initialize(patchPlugin, helpers, settings, locals);
-        exec.process && exec.process.forEach(function(processBlock) {
-            executeProcessBlock(processBlock, patchPlugin, settings, locals);
-        });
-        exec.finalize && exec.finalize(patchPlugin, helpers, settings, locals);
-    };
-
-    this.clearCache = () => cache = {};
     // event handlers
     $rootScope.$on('filesLoaded', service.loadSettings);
 });
