@@ -50,12 +50,14 @@
 <section>
     <div ng-repeat="patchPlugin in patchPlugins" class="patch-plugin-item">
         <input type="text" ng-model="patchPlugin.filename" ng-change="patchFileNameChanged(patchPlugin)" />
-        <button class="action-btn small" ng-click="buildPatchPlugin(patchPlugin)">Build</button>
+        <button class="action-btn small" ng-click="buildPatchPlugin(patchPlugin)" ng-disabled="!patchPlugin.patchers.length">Build</button>
         <button class="action-btn small negative" ng-click="removePatchPlugin($index)">Delete</button>
         <list-view items="patchPlugin.patchers" drag-type="patcher">
-            <input type="checkbox" ng-model="$parent.item.active" ng-change="patcherToggled($parent.item)"/>
-            {{::$parent.item.name}}
-            <span class="files-to-patch" title="{{$parent.item.filesToPatchHint}}">
+            <span title="{{$parent.item.disabledHint}}" ng-class="{'negative-fg': $parent.item.disabled}">
+                <input type="checkbox" ng-model="$parent.item.active" ng-change="patcherToggled($parent.item)" ng-disabled="$parent.item.disabled"/>
+                {{::$parent.item.name}}
+            </span>
+            <span class="files-to-patch" title="{{$parent.item.filesToPatchHint}}" ng-hide="$parent.item.disabled">
                 (Patching {{$parent.item.filesToPatch.length}} files)
             </span>
         </list-view>
