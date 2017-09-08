@@ -61,15 +61,27 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
 
     $scope.buildAllPatchPlugins = function() {
         wrapPatchers(function() {
-            $scope.patchPlugins.forEach((patchPlugin) => build(patchPlugin));
+            $scope.patchPlugins
+                .filter((patchPlugin) => { return !patchPlugin.disabled })
+                .forEach((patchPlugin) => build(patchPlugin));
         });
     };
 
-    // watchers
+    $scope.updatePatchStatuses = function() {
+        $scope.patchPlugins.forEach(function(patch) {
+            patch.disabled = patch.patchers.reduce(function(b, patcher) {
+                return b || !patcher.active;
+            }, false) || !patch.patchers.length;
+        });
+    };
+
+    // event handlers
     $scope.$on('buildAllPatches', $scope.buildAllPatchPlugins);
     $scope.$on('addPatchPlugin', $scope.addPatchPlugin);
+    $scope.$on('itemsReordered', $scope.updatePatchStatuses, true);
 
     // initialization
     patcherService.updateFilesToPatch();
     $scope.patchPlugins = patcherService.getPatchPlugins();
+    $scope.updatePatchStatuses();
 });
