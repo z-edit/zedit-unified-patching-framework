@@ -78,8 +78,8 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
     $scope.updatePatchStatuses = function() {
         $scope.patchPlugins.forEach(function(patch) {
             patch.disabled = patch.patchers.reduce(function(b, patcher) {
-                return b || !patcher.active || patcher.filename.length === 0;
-            }, false) || !patch.patchers.length;
+                return b || !patcher.active;
+            }, false) || !patch.patchers.length || !patch.filename.length;
         });
     };
 
@@ -283,6 +283,7 @@ ngapp.service('patchBuilder', function(patcherService) {
     };
 
     this.cleanPatchFile = function(patchFile) {
+        xelib.RemoveIdenticalRecords(patchFile);
         xelib.CleanMasters(patchFile);
     };
 
@@ -339,6 +340,12 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return Object.deepAssign(defaults, settings);
     };
 
+    let buildTabs = function() {
+        patchers.forEach((patcher) => {
+            if (patcher.settings) tabs.push(patcher.settings);
+        });
+    };
+
     let getFilesToPatchHint = function(patcher) {
         let filesToPatch = patcher.filesToPatch,
             hint = filesToPatch.slice(0, 40).join(', ');
@@ -377,10 +384,14 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.registerPatcher = function(patcher) {
-        if (!!service.getPatcher(patcher.info.id)) return;
+        if (service.getPatcher(patcher.info.id)) return;
         patchers.push(patcher);
-        if (!patcher.settings) return;
-        tabs.push(patcher.settings);
+    };
+
+    this.updateForGameMode = function(gameMode) {
+        patchers = patchers.filter(function(patcher) {
+            return patcher.gameModes.includes(gameMode);
+        });
     };
 
     this.loadSettings = function() {
@@ -389,6 +400,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         let settings = fh.loadJsonFile(service.settingsPath, {});
         service.settings = buildSettings(settings);
         service.saveSettings();
+        buildTabs();
     };
 
     this.saveSettings = function() {
@@ -461,6 +473,10 @@ ngapp.run(function(settingsService) {
     });
 });
 
+// register for events
 ngapp.run(function($rootScope, patcherService) {
+    $rootScope.$on('sessionStarted', function(e, selectedProfile) {
+        patcherService.updateForGameMode(selectedProfile.gameMode);
+    });
     $rootScope.$on('filesLoaded', patcherService.loadSettings);
 });
