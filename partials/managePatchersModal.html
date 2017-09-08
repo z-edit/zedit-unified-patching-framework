@@ -14,8 +14,8 @@
             <ng-include src="currentTab.templateUrl" dyn-controller="currentTab.controller"></ng-include>
 
             <div class="action-button-container" ng-if="onBuildPatchesTab">
-                <button class="action-btn" ng-click="buildAllPatchPlugins()">Build All</button>
-                <button class="action-btn positive" ng-click="addPatchPlugin()">Add Plugin</button>
+                <button class="action-btn" ng-click="$broadcast('buildAllPatches')">Build All</button>
+                <button class="action-btn positive" ng-click="$broadcast('addPatchPlugin')">Add Plugin</button>
             </div>
         </form>
     </div>
