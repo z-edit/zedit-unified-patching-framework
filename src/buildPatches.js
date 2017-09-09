@@ -23,6 +23,7 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
     };
 
     let wrapPatchers = function(callback) {
+        patcherService.saveSettings();
         xelib.CreateHandleGroup();
         try {
             callback();
