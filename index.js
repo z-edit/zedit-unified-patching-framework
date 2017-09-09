@@ -282,7 +282,8 @@ ngapp.service('patchBuilder', function(patcherService) {
     };
 
     this.cleanPatchFile = function(patchFile) {
-        xelib.RemoveIdenticalRecords(patchFile);
+        // TODO: uncomment when fixed
+        // xelib.RemoveIdenticalRecords(patchFile);
         xelib.CleanMasters(patchFile);
     };
 
