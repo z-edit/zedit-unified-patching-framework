@@ -25,7 +25,7 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
         let patchFile = patchBuilder.preparePatchFile(patchPlugin.filename);
         patchPlugin.patchers.forEach(function(patcher) {
             if (!patcher.active) return;
-            patchBuilder.executePatcher($scope, patcher.id, patchFile);
+            patchBuilder.executePatcher($scope, patcher.id, patcher.filesToPatch, patchFile);
         });
         patchBuilder.cleanPatchFile(patchFile);
     };
@@ -214,10 +214,9 @@ ngapp.service('patchBuilder', function(patcherService) {
         return file[cacheKey];
     };
 
-    let getPatcherHelpers = function(patcher) {
+    let getPatcherHelpers = function(patcher, filesToPatch) {
         return {
             LoadRecords: function(search, includeOverrides = false) {
-                let filesToPatch = getFilesToPatch(patcher);
                 return filesToPatch.reduce(function(records, filename) {
                     return records.concat(getRecords(filename, search, includeOverrides));
                 }, []);
@@ -243,10 +242,10 @@ ngapp.service('patchBuilder', function(patcherService) {
         return loadOpts.filter ? records.filter(loadOpts.filter) : records;
     };
 
-    let executeProcessBlock = function(processBlock, patchFile, settings, locals) {
+    let executeProcessBlock = function(processBlock, patchFile, filesToPatch, settings, locals) {
         let load = processBlock.load,
             patch = processBlock.patch;
-        settings.filesToPatch.forEach(function(filename) {
+        filesToPatch.forEach(function(filename) {
             let recordsToPatch = getRecordsToPatch(load, filename, settings, locals);
             if (recordsToPatch.length === 0) return;
             addRequiredMastersToPatch(filename, patchFile);
@@ -258,16 +257,16 @@ ngapp.service('patchBuilder', function(patcherService) {
     };
 
     // public functions
-    this.executePatcher = function(scope, patcherId, patchFile) {
+    this.executePatcher = function(scope, patcherId, filesToPatch, patchFile) {
         let patcher = patcherService.getPatcher(patcherId),
             exec = patcher.execute,
             settings = patcherService.settings[patcherId],
-            helpers = getPatcherHelpers(patcher),
+            helpers = getPatcherHelpers(patcher, filesToPatch),
             locals = {};
 
         exec.initialize && exec.initialize(patchFile, helpers, settings, locals);
         exec.process && exec.process.forEach(function(processBlock) {
-            executeProcessBlock(processBlock, patchFile, settings, locals);
+            executeProcessBlock(processBlock, patchFile, filesToPatch, settings, locals);
         });
         exec.finalize && exec.finalize(patchFile, helpers, settings, locals);
     };
@@ -322,12 +321,11 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 
     let getDefaultSettings = function(patcher) {
         let defaultSettings = patcher.settings.defaultSettings || {};
-        Object.deepAssign(defaultSettings, {
+        return Object.assign({
             patchFileName: 'zPatch.esp',
             ignoredFiles: [],
             enabled: true
-        });
-        return defaultSettings;
+        }, defaultSettings);
     };
 
     let buildSettings = function(settings) {
@@ -351,17 +349,6 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
             hint = filesToPatch.slice(0, 40).join(', ');
         if (filesToPatch.length > 40) hint += '...';
         return hint.wordwrap();
-    };
-
-    let getFilesToPatch = function(patcher) {
-        let patcherSettings = service.settings[patcher.info.id],
-            ignored = patcherSettings.ignoredFiles;
-            filesToPatch = xelib.GetLoadedFileNames().filter(function(filename) {
-                return !filename.endsWith('.Hardcoded.dat');
-            });
-        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
-        filesToPatch = filesToPatch.subtract(ignored);
-        return filesToPatch;
     };
 
     let createPatchPlugin = function(patchPlugins, patchFileName) {
@@ -417,9 +404,20 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
     };
 
+    this.getFilesToPatch = function(patcher) {
+        let patcherSettings = service.settings[patcher.info.id],
+            ignored = patcherSettings.ignoredFiles;
+        filesToPatch = xelib.GetLoadedFileNames().filter(function(filename) {
+            return !filename.endsWith('.Hardcoded.dat');
+        });
+        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
+        filesToPatch = filesToPatch.subtract(ignored);
+        return filesToPatch;
+    };
+
     this.updateFilesToPatch = function() {
         patchers.forEach(function(patcher) {
-            patcher.filesToPatch = getFilesToPatch(patcher);
+            patcher.filesToPatch = service.getFilesToPatch(patcher);
         });
     };
 
