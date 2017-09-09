@@ -34,14 +34,6 @@ ngapp.service('patchBuilder', function(patcherService) {
         }
     };
 
-    let addRequiredMastersToPatch = function(filename, patchPlugin) {
-        let plugin = getFile(filename);
-        xelib.GetMasterNames(plugin.handle).forEach(function(masterName) {
-            xelib.AddMaster(patchPlugin, masterName)
-        });
-        xelib.AddMaster(patchPlugin, filename);
-    };
-
     let getRecordsToPatch = function(load, filename, settings, locals) {
         let plugin = getFile(filename),
             loadOpts = load(plugin.handle, settings, locals);
@@ -56,7 +48,6 @@ ngapp.service('patchBuilder', function(patcherService) {
         filesToPatch.forEach(function(filename) {
             let recordsToPatch = getRecordsToPatch(load, filename, settings, locals);
             if (recordsToPatch.length === 0) return;
-            addRequiredMastersToPatch(filename, patchFile);
             recordsToPatch.forEach(function(record) {
                 let patchRecord = getOrCreatePatchRecord(patchFile, record);
                 patch(patchRecord, settings, locals);
@@ -86,6 +77,7 @@ ngapp.service('patchBuilder', function(patcherService) {
         }
         let patchFile = xelib.AddElement(0, filename);
         xelib.NukeFile(patchFile);
+        xelib.AddAllMasters(patchFile);
         return patchFile;
     };
 
