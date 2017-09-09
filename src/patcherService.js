@@ -62,17 +62,6 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return hint.wordwrap();
     };
 
-    let getFilesToPatch = function(patcher) {
-        let patcherSettings = service.settings[patcher.info.id],
-            ignored = patcherSettings.ignoredFiles;
-            filesToPatch = xelib.GetLoadedFileNames().filter(function(filename) {
-                return !filename.endsWith('.Hardcoded.dat');
-            });
-        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
-        filesToPatch = filesToPatch.subtract(ignored);
-        return filesToPatch;
-    };
-
     let createPatchPlugin = function(patchPlugins, patchFileName) {
         let patchPlugin = { filename: patchFileName, patchers: [] };
         patchPlugins.push(patchPlugin);
@@ -126,9 +115,20 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
     };
 
+    this.getFilesToPatch = function(patcher) {
+        let patcherSettings = service.settings[patcher.info.id],
+            ignored = patcherSettings.ignoredFiles;
+        filesToPatch = xelib.GetLoadedFileNames().filter(function(filename) {
+            return !filename.endsWith('.Hardcoded.dat');
+        });
+        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
+        filesToPatch = filesToPatch.subtract(ignored);
+        return filesToPatch;
+    };
+
     this.updateFilesToPatch = function() {
         patchers.forEach(function(patcher) {
-            patcher.filesToPatch = getFilesToPatch(patcher);
+            patcher.filesToPatch = service.getFilesToPatch(patcher);
         });
     };
 

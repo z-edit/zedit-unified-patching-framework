@@ -22,10 +22,9 @@ ngapp.service('patchBuilder', function(patcherService) {
         return file[cacheKey];
     };
 
-    let getPatcherHelpers = function(patcher) {
+    let getPatcherHelpers = function(patcher, filesToPatch) {
         return {
             LoadRecords: function(search, includeOverrides = false) {
-                let filesToPatch = getFilesToPatch(patcher);
                 return filesToPatch.reduce(function(records, filename) {
                     return records.concat(getRecords(filename, search, includeOverrides));
                 }, []);
@@ -51,10 +50,10 @@ ngapp.service('patchBuilder', function(patcherService) {
         return loadOpts.filter ? records.filter(loadOpts.filter) : records;
     };
 
-    let executeProcessBlock = function(processBlock, patchFile, settings, locals) {
+    let executeProcessBlock = function(processBlock, patchFile, filesToPatch, settings, locals) {
         let load = processBlock.load,
             patch = processBlock.patch;
-        settings.filesToPatch.forEach(function(filename) {
+        filesToPatch.forEach(function(filename) {
             let recordsToPatch = getRecordsToPatch(load, filename, settings, locals);
             if (recordsToPatch.length === 0) return;
             addRequiredMastersToPatch(filename, patchFile);
@@ -66,16 +65,16 @@ ngapp.service('patchBuilder', function(patcherService) {
     };
 
     // public functions
-    this.executePatcher = function(scope, patcherId, patchFile) {
+    this.executePatcher = function(scope, patcherId, filesToPatch, patchFile) {
         let patcher = patcherService.getPatcher(patcherId),
             exec = patcher.execute,
             settings = patcherService.settings[patcherId],
-            helpers = getPatcherHelpers(patcher),
+            helpers = getPatcherHelpers(patcher, filesToPatch),
             locals = {};
 
         exec.initialize && exec.initialize(patchFile, helpers, settings, locals);
         exec.process && exec.process.forEach(function(processBlock) {
-            executeProcessBlock(processBlock, patchFile, settings, locals);
+            executeProcessBlock(processBlock, patchFile, filesToPatch, settings, locals);
         });
         exec.finalize && exec.finalize(patchFile, helpers, settings, locals);
     };
