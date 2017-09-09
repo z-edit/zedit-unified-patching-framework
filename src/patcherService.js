@@ -31,12 +31,11 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 
     let getDefaultSettings = function(patcher) {
         let defaultSettings = patcher.settings.defaultSettings || {};
-        Object.deepAssign(defaultSettings, {
+        return Object.assign({
             patchFileName: 'zPatch.esp',
             ignoredFiles: [],
             enabled: true
-        });
-        return defaultSettings;
+        }, defaultSettings);
     };
 
     let buildSettings = function(settings) {
