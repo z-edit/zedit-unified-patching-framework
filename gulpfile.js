@@ -24,8 +24,10 @@ gulp.task('build', ['clean'], function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('src/**/*.js', ['build']);
-  gulp.watch('partials/**/*.html', ['build']);
+    gulp.watch('src/**/*.js', ['build']);
+    gulp.watch('partials/**/*.html', ['build']);
+    gulp.watch('images/**/*', ['build']);
+    gulp.watch('module.json', ['build']);
 });
 
 gulp.task('default', ['build', 'watch']);
