@@ -8,7 +8,8 @@
   "repository": "https://github.com/matortheeternal/zedit-unified-patching-framework",
   "license": "MIT",
   "scripts": {
-    "build": "gulp build"
+    "build": "gulp build",
+    "dev": "gulp"
   },
   "dependencies": {},
   "devDependencies": {

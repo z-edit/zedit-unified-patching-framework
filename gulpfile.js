@@ -23,4 +23,9 @@ gulp.task('build', ['clean'], function() {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('default', ['build']);
+gulp.task('watch', function() {
+  gulp.watch('src/**/*.js', ['build']);
+  gulp.watch('partials/**/*.html', ['build']);
+});
+
+gulp.task('default', ['build', 'watch']);
