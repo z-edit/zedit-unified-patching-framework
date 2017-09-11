@@ -1,18 +1,9 @@
 ngapp.service('patchBuilder', function($rootScope, $q, patcherService, errorService, backgroundService) {
-    let progress, cache = {};
-
-    let getMaxProgress = function(patchPlugin) {
-        return patchPlugin.patchers.map(function(patcher) {
-            return patcherService.getPatcher(patcher.id);
-        }).reduce(function(sum, patcher) {
-            let numProcessTasks = 3 * patcher.execute.process.length;
-            return sum + 3 + numProcessTasks * patcher.filesToPatch.length;
-        }, 0);
-    };
+    let cache = {}, progress;
 
     let build = function(patchPlugin) {
         return backgroundService.run({
-            filename: `${modulePath}/patchWorker.js`,
+            filename: `modules/unifiedPatchingFramework/patchWorker.js`,
             data: {
                 cache: cache,
                 patchPlugin: patchPlugin,
@@ -47,6 +38,32 @@ ngapp.service('patchBuilder', function($rootScope, $q, patcherService, errorServ
         $rootScope.$broadcast('fileAdded');
     };
 
+    let getMaxProgress = function(patchPlugin) {
+        return patchPlugin.patchers.map(function(patcher) {
+            return patcherService.getPatcher(patcher.id);
+        }).reduce(function(sum, patcher) {
+            let numProcessTasks = 3 * patcher.execute.process.length;
+            return sum + 3 + numProcessTasks * patcher.filesToPatch.length;
+        }, 0);
+    };
+
+    let getTotalMaxProgress = function(patchPlugins) {
+        return patchPlugins.reduce(function(sum, patchPlugin) {
+            return sum + getMaxProgress(patchPlugin);
+        }, 0);
+    };
+
+    let openProgressModal = function(maxProgress) {
+        progress = {
+            title: 'Running Patchers',
+            message: 'Initializing...',
+            log: [],
+            current: 0,
+            max: maxProgress
+        };
+        $rootScope.$broadcast('openModal', 'progress', { progress: progress });
+    };
+
     let wrapPatchers = function(callback, maxProgress) {
         xelib.CreateHandleGroup();
         openProgressModal(maxProgress);
@@ -54,18 +71,6 @@ ngapp.service('patchBuilder', function($rootScope, $q, patcherService, errorServ
             cleanup();
             errorService.handleException(error);
         });
-    };
-
-    let getActivePatchPlugins = function(patchPlugins) {
-        return patchPlugins.filter(function(patchPlugin) {
-            return !patchPlugin.disabled;
-        })
-    };
-
-    let getTotalMaxProgress = function(patchPlugins) {
-        return patchPlugins.reduce(function(sum, patchPlugin) {
-            return sum + getMaxProgress(patchPlugin);
-        }, 0)
     };
 
     let buildNextPatchPlugin = function(index, patchPlugins, action) {
@@ -79,10 +84,17 @@ ngapp.service('patchBuilder', function($rootScope, $q, patcherService, errorServ
         );
     };
 
+    let getActivePatchPlugins = function(patchPlugins) {
+        return patchPlugins.filter(function(patchPlugin) {
+            return !patchPlugin.disabled;
+        })
+    };
+
     // public functions
     this.buildPatchPlugins = function(patchPlugins) {
         let activePatchPlugins = getActivePatchPlugins(patchPlugins),
             maxProgress = getTotalMaxProgress(activePatchPlugins);
+        if (activePatchPlugins.length === 0) return;
         wrapPatchers(function() {
             let action = $q.defer();
             buildNextPatchPlugin(0, activePatchPlugins, action);
