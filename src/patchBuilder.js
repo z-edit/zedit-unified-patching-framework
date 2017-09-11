@@ -3,7 +3,7 @@ ngapp.service('patchBuilder', function(patcherService) {
 
     // private functions
     let getOrCreatePatchRecord = function(patchFile, record) {
-        return xelib.AddElement(patchFile, xelib.HexFormID(record));
+        return xelib.AddElement(patchFile, xelib.GetHexFormID(record));
     };
 
     let getFile = function(filename) {
