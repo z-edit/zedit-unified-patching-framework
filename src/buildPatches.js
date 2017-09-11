@@ -1,4 +1,4 @@
-ngapp.controller('buildPatchesController', function($scope, $q, patcherService) {
+ngapp.controller('buildPatchesController', function($scope, $q, patcherService, patchBuilder) {
     // helper functions
     let getNewPatchFilename = function() {
         let patchFileNames = $scope.patchPlugins.map(function(patchPlugin) {
