@@ -52,19 +52,19 @@ let getRecordsToPatch = function(loadFn, filename, settings, locals) {
     return filterRecords(records, loadOpts.filter, recordsContext);
 };
 
-let patchRecords = function(patchFn, patchFile, filename, recordsToPatch) {
+let patchRecords = function(patchFn, filename, recordsToPatch, settings, locals) {
     let signature = xelib.Signature(recordsToPatch[0]),
         recordsContext = getRecordsContext(signature, filename);
     patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}.`);
     recordsToPatch.forEach(function(record) {
-        let patchRecord = getOrCreatePatchRecord(patchFile, record);
+        let patchRecord = getOrCreatePatchRecord(record);
         patchFn(patchRecord, settings, locals);
     });
 };
 
-let getPatcherHelpers = function(patcher) {
+let getPatcherHelpers = function(patcher, filesToPatch) {
     let loadRecords = function(search, includeOverrides = false) {
-        return patcher.filestoPatch.reduce(function(records, fn) {
+        return filesToPatch.reduce(function(records, fn) {
             return records.concat(getRecords(fn, search, includeOverrides));
         }, []);
     };
@@ -75,23 +75,23 @@ let getPatcherHelpers = function(patcher) {
     }
 };
 
-let process = function(processBlock, patchFile, filesToPatch, settings, locals) {
+let process = function(processBlock, filesToPatch, settings, locals) {
     let loadFn = processBlock.load,
         patchFn = processBlock.patch;
     filesToPatch.forEach(function(filename) {
         let recordsToPatch = getRecordsToPatch(loadFn, filename, settings, locals);
         if (recordsToPatch.length === 0) {
-            AddProgres(1);
+            AddProgress(1);
             return;
         }
-        patchRecords(patchFn, patchFile, filename, recordsToPatch);
+        patchRecords(patchFn, filename, recordsToPatch, settings, locals);
     });
 };
 
 let getPatcher = function(patcherId) {
     let modulePath = `modules\\${patcherId}`,
         moduleInfo = fh.loadJsonFile(`${modulePath}\\module.json`, null),
-        patcherCode = fh.readTextFile(`${modulePath}\\index.js`),
+        patcherCode = fh.loadTextFile(`${modulePath}\\index.js`),
         patcher = null;
     let fn = new Function('registerPatcher', 'fh', 'info', patcherCode);
     fn((obj) => patcher = obj, fh, moduleInfo);
@@ -109,18 +109,17 @@ let preparePatchFile = function(filename) {
     return patchFile;
 };
 
-let executePatcher = function(patcherId) {
+let executePatcher = function(patcherId, filesToPatch) {
     let patcher = getPatcher(patcherId),
         patcherSettings = settings[patcherId],
         exec = patcher.execute,
-        filesToPatch = patcher.filesToPatch,
-        helpers = getPatcherHelpers(patcher),
+        helpers = getPatcherHelpers(patcher, filesToPatch),
         locals = {};
 
     patcherProgress('Initializing...');
     exec.initialize && exec.initialize(patchFile, helpers, patcherSettings, locals);
     exec.process && exec.process.forEach(function(processBlock) {
-        process(processBlock, patchFile, filesToPatch, patcherSettings, locals);
+        process(processBlock, filesToPatch, patcherSettings, locals);
     });
     patcherProgress('Finalizing...');
     exec.finalize && exec.finalize(patchFile, helpers, patcherSettings, locals);
@@ -139,8 +138,8 @@ patchFileName = patchPlugin.filename;
 patchFile = preparePatchFile(patchFileName);
 patchPlugin.patchers.forEach(function(patcher) {
     if (!patcher.active) return;
-    ProgressTitle(`Building ${patchFileName}: running ${patcher.name}`);
-    executePatcher(patcher.id, patchFile);
+    ProgressTitle(`Building ${patchFileName} -- Running ${patcher.name}`);
+    executePatcher(patcher.id, patcher.filesToPatch);
 });
 cleanPatchFile(patchFile);
 SetCache(cache);
