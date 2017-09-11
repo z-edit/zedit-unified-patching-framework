@@ -1,4 +1,4 @@
-ngapp.controller('buildPatchesController', function($scope, patcherService, patchBuilder, errorService) {
+ngapp.controller('buildPatchesController', function($scope, $q, patcherService) {
     // helper functions
     let getNewPatchFilename = function() {
         let patchFileNames = $scope.patchPlugins.map(function(patchPlugin) {
@@ -11,29 +11,6 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
             patchFileName = `Patch ${++counter}.esp`;
         }
         return patchFileName;
-    };
-
-    let build = function(patchPlugin) {
-        let patchFile = patchBuilder.preparePatchFile(patchPlugin.filename);
-        patchPlugin.patchers.forEach(function(patcher) {
-            if (!patcher.active) return;
-            patchBuilder.executePatcher($scope, patcher.id, patcher.filesToPatch, patchFile);
-        });
-        patchBuilder.cleanPatchFile(patchFile);
-    };
-
-    let wrapPatchers = function(callback) {
-        patcherService.saveSettings();
-        xelib.CreateHandleGroup();
-        try {
-            callback();
-        } catch (e) {
-            errorService.handleException(e);
-        } finally {
-            patchBuilder.clearCache();
-            xelib.FreeHandleGroup();
-            $scope.$root.$broadcast('fileAdded');
-        }
     };
 
     // scope functions
@@ -57,15 +34,11 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
     $scope.removePatchPlugin = (index) => $scope.patchPlugins.splice(index, 1);
 
     $scope.buildPatchPlugin = function(patchPlugin) {
-        wrapPatchers(() => build(patchPlugin));
+        patchBuilder.buildPatchPlugins([patchPlugin]);
     };
 
     $scope.buildAllPatchPlugins = function() {
-        wrapPatchers(function() {
-            $scope.patchPlugins
-                .filter((patchPlugin) => { return !patchPlugin.disabled })
-                .forEach((patchPlugin) => build(patchPlugin));
-        });
+        patchBuilder.buildPatchPlugins($scope.patchPlugins);
     };
 
     $scope.updatePatchStatuses = function() {
