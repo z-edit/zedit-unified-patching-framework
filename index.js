@@ -2,7 +2,9 @@
 // helper variables and functions
 const modulePath = '../modules/unifiedPatchingFramework';
 const openManagePatchersModal = function(scope) {
-  scope.$emit('openModal', 'managePatchers', { basePath: modulePath });
+  scope.$emit('openModal', 'managePatchers', {
+      basePath: `${modulePath}/partials`
+  });
 };
 //=require src/*.js
 // add manage patchers context menu item to tree view context menu
