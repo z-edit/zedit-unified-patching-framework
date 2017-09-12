@@ -1,15 +1,15 @@
-ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchWorker, errorService, progressService) {
+ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService) {
     let cache = {};
 
-    let build = (patchPlugin) => patchWorker.run(cache, patchPlugin);
+    let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
 
     let getMaxProgress = function(patchPlugin) {
         return patchPlugin.patchers.map(function(patcher) {
             return patcherService.getPatcher(patcher.id);
         }).reduce(function(sum, patcher) {
             let numProcessTasks = 3 * patcher.execute.process.length;
-            return sum + 3 + numProcessTasks * patcher.filesToPatch.length;
-        }, 0);
+            return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
+        }, 1);
     };
 
     let getTotalMaxProgress = function(patchPlugins) {
@@ -33,7 +33,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     let getActivePatchPlugins = function(patchPlugins) {
         return patchPlugins.filter(function(patchPlugin) {
             return !patchPlugin.disabled;
-        })
+        });
     };
 
     // public functions
