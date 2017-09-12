@@ -50,7 +50,7 @@ ngapp.service('patchWorker', function(patcherService, progressService) {
             let plugin = getFile(filename),
                 loadOpts = loadFn(plugin.handle, settings, locals);
             if (!loadOpts) {
-                AddProgress(2);
+                addProgress(2);
                 return [];
             }
             let recordsContext = getRecordsContext(loadOpts.signature, filename),
@@ -112,13 +112,15 @@ ngapp.service('patchWorker', function(patcherService, progressService) {
         };
 
         let process = function(exec, filesToPatch, patcherSettings, locals) {
-            exec.process && exec.process.forEach(function(processBlock) {
+            if (!exec.process) return;
+            exec.process.forEach(function(processBlock) {
                 executeBlock(processBlock, filesToPatch, patcherSettings, locals);
             });
         };
 
         let finalize = function(exec, helpers, patcherSettings, locals) {
             patcherProgress('Finalizing...');
+            if (!exec.finalize) return;
             exec.finalize(patchFile, helpers, patcherSettings, locals);
         };
 
@@ -134,7 +136,7 @@ ngapp.service('patchWorker', function(patcherService, progressService) {
         };
 
         let cleanPatchFile = function(patchFile) {
-            LogMessage('Removing ITPOs and cleaning masters.');
+            logMessage('Removing ITPOs and cleaning masters.');
             // TODO: uncomment when this is fixed
             //xelib.RemoveIdenticalRecords(patchFile);
             xelib.CleanMasters(patchFile);
