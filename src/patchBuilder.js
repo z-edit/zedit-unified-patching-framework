@@ -45,6 +45,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         openProgressModal(maxProgress);
         $timeout(function() {
             errorService.try(() => activePatchPlugins.forEach(build));
+            progressService.allowClose();
             cache = {};
             xelib.FreeHandleGroup();
             $rootScope.$broadcast('fileAdded');
