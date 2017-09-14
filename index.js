@@ -44,13 +44,8 @@ ngapp.run(function($rootScope, patcherService) {
 moduleService.deferLoader('UPF');
 ngapp.run(function(patcherService) {
     moduleService.registerLoader('UPF', function(module, fh) {
-        let args = {
-            registerPatcher: patcherService.registerPatcher,
-            fh: fh,
-            info: module.info,
-            modulePath: module.path
-        };
-        let fn = new Function(...Object.keys(args), module.code);
-        fn(...Object.values(args));
+        let argKeys = ['registerPatcher', 'fh', 'info', 'patcherPath'];
+        let fn = new Function(...argKeys, module.code);
+        fn(patcherService.registerPatcher, fh, module.info, module.path);
     });
 });
