@@ -1,12 +1,12 @@
-/* global ngapp, xelib */
+/* global ngapp, xelib, moduleService */
 // helper variables and functions
 const modulePath = '../modules/unifiedPatchingFramework';
 const openManagePatchersModal = function(scope) {
   scope.$emit('openModal', 'managePatchers', {
-    templateUrl: `${modulePath}/partials/managePatchersModal.html`
+      basePath: `${modulePath}/partials`
   });
 };
-ngapp.controller('buildPatchesController', function($scope, patcherService, patchBuilder, errorService) {
+ngapp.controller('buildPatchesController', function($scope, $q, patcherService, patchBuilder) {
     // helper functions
     let getNewPatchFilename = function() {
         let patchFileNames = $scope.patchPlugins.map(function(patchPlugin) {
@@ -19,29 +19,6 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
             patchFileName = `Patch ${++counter}.esp`;
         }
         return patchFileName;
-    };
-
-    let build = function(patchPlugin) {
-        let patchFile = patchBuilder.preparePatchFile(patchPlugin.filename);
-        patchPlugin.patchers.forEach(function(patcher) {
-            if (!patcher.active) return;
-            patchBuilder.executePatcher($scope, patcher.id, patcher.filesToPatch, patchFile);
-        });
-        patchBuilder.cleanPatchFile(patchFile);
-    };
-
-    let wrapPatchers = function(callback) {
-        patcherService.saveSettings();
-        xelib.CreateHandleGroup();
-        try {
-            callback();
-        } catch (e) {
-            errorService.handleException(e);
-        } finally {
-            patchBuilder.clearCache();
-            xelib.FreeHandleGroup();
-            $scope.$root.$broadcast('fileAdded');
-        }
     };
 
     // scope functions
@@ -65,15 +42,11 @@ ngapp.controller('buildPatchesController', function($scope, patcherService, patc
     $scope.removePatchPlugin = (index) => $scope.patchPlugins.splice(index, 1);
 
     $scope.buildPatchPlugin = function(patchPlugin) {
-        wrapPatchers(() => build(patchPlugin));
+        patchBuilder.buildPatchPlugins([patchPlugin]);
     };
 
     $scope.buildAllPatchPlugins = function() {
-        wrapPatchers(function() {
-            $scope.patchPlugins
-                .filter((patchPlugin) => { return !patchPlugin.disabled })
-                .forEach((patchPlugin) => build(patchPlugin));
-        });
+        patchBuilder.buildPatchPlugins($scope.patchPlugins);
     };
 
     $scope.updatePatchStatuses = function() {
@@ -191,104 +164,59 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
         selectTab(tab);
     };
 });
-ngapp.service('patchBuilder', function(patcherService) {
+ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService) {
     let cache = {};
 
-    // private functions
-    let getOrCreatePatchRecord = function(patchFile, record) {
-        return xelib.AddElement(patchFile, xelib.HexFormID(record));
+    let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
+
+    let getMaxProgress = function(patchPlugin) {
+        return patchPlugin.patchers.map(function(patcher) {
+            return patcherService.getPatcher(patcher.id);
+        }).reduce(function(sum, patcher) {
+            let numProcessTasks = 3 * patcher.execute.process.length;
+            return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
+        }, 1);
     };
 
-    let getFile = function(filename) {
-        if (!cache[filename]) {
-            cache[filename] = { handle: xelib.FileByName(filename) };
-        }
-        return cache[filename];
+    let getTotalMaxProgress = function(patchPlugins) {
+        return patchPlugins.reduce(function(sum, patchPlugin) {
+            return sum + getMaxProgress(patchPlugin);
+        }, 0);
     };
 
-    let getRecords = function(filename, search, includeOverrides) {
-        let file = getFile(filename),
-            cacheKey = `${search}_${+includeOverrides}`;
-        if (!file[cacheKey]) {
-            file[cacheKey] = xelib.GetRecords(file.handle, search, includeOverrides);
-        }
-        return file[cacheKey];
-    };
-
-    let getPatcherHelpers = function(patcher, filesToPatch) {
-        return {
-            LoadRecords: function(search, includeOverrides = false) {
-                return filesToPatch.reduce(function(records, filename) {
-                    return records.concat(getRecords(filename, search, includeOverrides));
-                }, []);
-            },
-            AllSettings: patcherService.settings
-            // TODO: More helpers here?
-        }
-    };
-
-    let addRequiredMastersToPatch = function(filename, patchPlugin) {
-        let plugin = getFile(filename);
-        xelib.GetMasterNames(plugin.handle).forEach(function(masterName) {
-            xelib.AddMaster(patchPlugin, masterName)
+    let openProgressModal = function(maxProgress) {
+        $rootScope.$broadcast('closeModal');
+        progressService.showProgress({
+            determinate: true,
+            title: 'Running Patchers',
+            message: 'Initializing...',
+            log: [],
+            current: 0,
+            max: maxProgress
         });
-        xelib.AddMaster(patchPlugin, filename);
     };
 
-    let getRecordsToPatch = function(load, filename, settings, locals) {
-        let plugin = getFile(filename),
-            loadOpts = load(plugin.handle, settings, locals);
-        if (!loadOpts) return [];
-        let records = getRecords(filename, loadOpts.signature, false);
-        return loadOpts.filter ? records.filter(loadOpts.filter) : records;
-    };
-
-    let executeProcessBlock = function(processBlock, patchFile, filesToPatch, settings, locals) {
-        let load = processBlock.load,
-            patch = processBlock.patch;
-        filesToPatch.forEach(function(filename) {
-            let recordsToPatch = getRecordsToPatch(load, filename, settings, locals);
-            if (recordsToPatch.length === 0) return;
-            addRequiredMastersToPatch(filename, patchFile);
-            recordsToPatch.forEach(function(record) {
-                let patchRecord = getOrCreatePatchRecord(patchFile, record);
-                patch(patchRecord, settings, locals);
-            });
+    let getActivePatchPlugins = function(patchPlugins) {
+        return patchPlugins.filter(function(patchPlugin) {
+            return !patchPlugin.disabled;
         });
     };
 
     // public functions
-    this.executePatcher = function(scope, patcherId, filesToPatch, patchFile) {
-        let patcher = patcherService.getPatcher(patcherId),
-            exec = patcher.execute,
-            settings = patcherService.settings[patcherId],
-            helpers = getPatcherHelpers(patcher, filesToPatch),
-            locals = {};
-
-        exec.initialize && exec.initialize(patchFile, helpers, settings, locals);
-        exec.process && exec.process.forEach(function(processBlock) {
-            executeProcessBlock(processBlock, patchFile, filesToPatch, settings, locals);
-        });
-        exec.finalize && exec.finalize(patchFile, helpers, settings, locals);
+    this.buildPatchPlugins = function(patchPlugins) {
+        let activePatchPlugins = getActivePatchPlugins(patchPlugins),
+            maxProgress = getTotalMaxProgress(activePatchPlugins);
+        if (activePatchPlugins.length === 0) return;
+        xelib.CreateHandleGroup();
+        openProgressModal(maxProgress);
+        $timeout(function() {
+            errorService.try(() => activePatchPlugins.forEach(build));
+            progressService.allowClose();
+            cache = {};
+            xelib.FreeHandleGroup();
+            $rootScope.$broadcast('fileAdded');
+        }, 50);
     };
-
-    this.preparePatchFile = function(filename) {
-        if (!xelib.HasElement(0, filename)) {
-            let dataPath = xelib.GetGlobal('DataPath');
-            fh.jetpack.cwd(dataPath).remove(filename);
-        }
-        let patchFile = xelib.AddElement(0, filename);
-        xelib.NukeFile(patchFile);
-        return patchFile;
-    };
-
-    this.cleanPatchFile = function(patchFile) {
-        // TODO: uncomment when fixed
-        // xelib.RemoveIdenticalRecords(patchFile);
-        xelib.CleanMasters(patchFile);
-    };
-
-    this.clearCache = () => cache = {};
 });
 ngapp.service('patcherService', function($rootScope, settingsService) {
     let service = this,
@@ -441,6 +369,176 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return patchPlugins;
     };
 });
+ngapp.service('patcherWorker', function(patcherService, progressService) {
+    this.run = function(cache, patchFileName, patchFile, patcherInfo) {
+        let filesToPatch, patcher, patcherSettings, helpers, locals;
+
+        // helper functions
+        let progressMessage = (title) => progressService.progressMessage(title);
+        let logMessage = (title) => progressService.logMessage(title);
+        let addProgress = (title) => progressService.addProgress(title);
+
+        let patcherProgress = function(message) {
+            addProgress(1);
+            progressMessage(message);
+        };
+
+        let getOrCreatePatchRecord = function(record) {
+            return xelib.AddElement(patchFile, xelib.GetHexFormID(record));
+        };
+
+        let getFile = function(filename) {
+            if (!cache[filename])
+                cache[filename] = { handle: xelib.FileByName(filename) };
+            return cache[filename];
+        };
+
+        let getRecords = function(filename, search, overrides) {
+            let file = getFile(filename),
+                cacheKey = `${search}_${+overrides}`;
+            if (!file[cacheKey])
+                file[cacheKey] = xelib.GetRecords(file.handle, search, overrides);
+            return file[cacheKey];
+        };
+
+        let getRecordsContext = function(signature, filename) {
+            let recordType = xelib.NameFromSignature(signature);
+            return `${recordType} records from ${filename}`;
+        };
+
+        let loadRecords = function(filename, signature, recordsContext) {
+            patcherProgress(`Loading ${recordsContext}.`);
+            return getRecords(filename, signature, false);
+        };
+
+        let filterRecords = function(records, filterFn, recordsContext) {
+            patcherProgress(`Filtering ${records.length} ${recordsContext}`);
+            return filterFn ? records.filter(filterFn) : records;
+        };
+
+        let getRecordsToPatch = function(loadFn, filename) {
+            let plugin = getFile(filename),
+                loadOpts = loadFn(plugin.handle, helpers, patcherSettings, locals);
+            if (!loadOpts) {
+                addProgress(2);
+                return [];
+            }
+            let signature = loadOpts.signature,
+                recordsContext = getRecordsContext(signature, filename),
+                records = loadRecords(filename, signature, recordsContext);
+            return filterRecords(records, loadOpts.filter, recordsContext);
+        };
+
+        let patchRecords = function(patchFn, filename, recordsToPatch) {
+            let signature = xelib.Signature(recordsToPatch[0]),
+                recordsContext = getRecordsContext(signature, filename);
+            patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
+            recordsToPatch.forEach(function(record) {
+                let patchRecord = getOrCreatePatchRecord(record);
+                patchFn(patchRecord, helpers, patcherSettings, locals);
+            });
+        };
+
+        let getPatcherHelpers = function() {
+            let loadRecords = function(search, includeOverrides = false) {
+                return filesToPatch.reduce(function(records, fn) {
+                    return records.concat(getRecords(fn, search, includeOverrides));
+                }, []);
+            };
+            return {
+                loadRecords: loadRecords,
+                allSettings: patcherService.settings,
+                logMessage: logMessage
+            }
+        };
+
+        let executeBlock = function(processBlock) {
+            let loadFn = processBlock.load,
+                patchFn = processBlock.patch;
+            filesToPatch.forEach(function(filename) {
+                let recordsToPatch = getRecordsToPatch(loadFn, filename);
+                if (recordsToPatch.length === 0) {
+                    addProgress(1);
+                    return;
+                }
+                patchRecords(patchFn, filename, recordsToPatch);
+            });
+        };
+
+        let initialize = function(exec) {
+            patcherProgress('Initializing...');
+            if (!exec.initialize) return;
+            exec.initialize(patchFile, helpers, patcherSettings, locals);
+        };
+
+        let process = function(exec) {
+            if (!exec.process) return;
+            exec.process.forEach(function(processBlock) {
+                executeBlock(processBlock);
+            });
+        };
+
+        let finalize = function(exec) {
+            patcherProgress('Finalizing...');
+            if (!exec.finalize) return;
+            exec.finalize(patchFile, helpers, patcherSettings, locals);
+        };
+
+        let patcherId = patcherInfo.id;
+        filesToPatch = patcherInfo.filesToPatch;
+        patcher = patcherService.getPatcher(patcherId);
+        patcherSettings = patcherService.settings[patcherId];
+        helpers = getPatcherHelpers();
+        locals = {};
+
+        initialize(patcher.execute);
+        process(patcher.execute);
+        finalize(patcher.execute);
+    };
+});
+ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
+    this.run = function(cache, patchPlugin) {
+        let progressTitle = function(title) {
+            progressService.progressTitle(title);
+        };
+
+        let patcherProgress = function(message) {
+            progressService.addProgress(1);
+            progressService.progressMessage(message);
+        };
+
+        let preparePatchFile = function(filename) {
+            if (!xelib.HasElement(0, filename)) {
+                let dataPath = xelib.GetGlobal('DataPath');
+                fh.jetpack.cwd(dataPath).remove(filename);
+            }
+            let patchFile = xelib.AddElement(0, filename);
+            xelib.NukeFile(patchFile);
+            xelib.AddAllMasters(patchFile);
+            return patchFile;
+        };
+
+        let cleanPatchFile = function(patchFile) {
+            patcherProgress('Removing ITPOs and cleaning masters.');
+            try {
+                xelib.RemoveIdenticalRecords(patchFile);
+            } catch (x) {
+                console.log('Removing ITPOs failed, ' + x.message);
+            }
+            xelib.CleanMasters(patchFile);
+        };
+
+        // MAIN WORKER EXECUTION
+        let patchFileName = patchPlugin.filename,
+            patchFile = preparePatchFile(patchFileName);
+        patchPlugin.patchers.forEach(function(patcher) {
+            if (!patcher.active) return;
+            progressTitle(`Building ${patchFileName} ~ Running ${patcher.name}`);
+            patcherWorker.run(cache, patchFileName, patchFile, patcher);
+        });
+        cleanPatchFile(patchFile);
+    };
+});
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.managePatchers = function() {
         $scope.saveSettings(false);
@@ -479,4 +577,13 @@ ngapp.run(function($rootScope, patcherService) {
         patcherService.updateForGameMode(selectedProfile.gameMode);
     });
     $rootScope.$on('filesLoaded', patcherService.loadSettings);
+});
+
+// register deferred module loader
+moduleService.deferLoader('UPF');
+ngapp.run(function(patcherService) {
+    moduleService.registerLoader('UPF', function(module, fh) {
+        let fn = new Function('registerPatcher', 'fh', 'info', module.code);
+        fn(patcherService.registerPatcher, fh, module.info);
+    });
 });
