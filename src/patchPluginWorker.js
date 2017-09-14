@@ -22,8 +22,11 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
 
         let cleanPatchFile = function(patchFile) {
             patcherProgress('Removing ITPOs and cleaning masters.');
-            // TODO: uncomment when this is fixed
-            //xelib.RemoveIdenticalRecords(patchFile);
+            try {
+                xelib.RemoveIdenticalRecords(patchFile);
+            } catch (x) {
+                console.log('Removing ITPOs failed, ' + x.message);
+            }
             xelib.CleanMasters(patchFile);
         };
 
