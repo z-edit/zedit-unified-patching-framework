@@ -1,6 +1,5 @@
-/* global ngapp, xelib, moduleService */
+/* global ngapp, xelib, modulePath, moduleService */
 // helper variables and functions
-const modulePath = '../modules/unifiedPatchingFramework';
 const openManagePatchersModal = function(scope) {
   scope.$emit('openModal', 'managePatchers', {
       basePath: `${modulePath}/partials`
@@ -540,6 +539,11 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
     };
 });
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
+    $scope.bannerStyle = {
+        'background': `url('${modulePath}/images/banner.jpg')`,
+        'background-size': 'cover'
+    };
+
     $scope.managePatchers = function() {
         $scope.saveSettings(false);
         $timeout(() => openManagePatchersModal($scope));
@@ -583,7 +587,8 @@ ngapp.run(function($rootScope, patcherService) {
 moduleService.deferLoader('UPF');
 ngapp.run(function(patcherService) {
     moduleService.registerLoader('UPF', function(module, fh) {
-        let fn = new Function('registerPatcher', 'fh', 'info', module.code);
-        fn(patcherService.registerPatcher, fh, module.info);
+        let argKeys = ['registerPatcher', 'fh', 'info', 'patcherPath'];
+        let fn = new Function(...argKeys, module.code);
+        fn(patcherService.registerPatcher, fh, module.info, module.path);
     });
 });
