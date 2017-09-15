@@ -36,6 +36,13 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         });
     };
 
+    let progressDone = function(patchPlugins) {
+        let n = patchPlugins.length;
+        progressService.progressTitle(`${n} patch plugins built successfully`);
+        progressService.progressMessage('All Done!');
+        progressService.allowClose();
+    };
+
     // public functions
     this.buildPatchPlugins = function(patchPlugins) {
         let activePatchPlugins = getActivePatchPlugins(patchPlugins),
@@ -45,7 +52,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         openProgressModal(maxProgress);
         $timeout(function() {
             errorService.try(() => activePatchPlugins.forEach(build));
-            progressService.allowClose();
+            progressDone(activePatchPlugins);
             cache = {};
             xelib.FreeHandleGroup();
             $rootScope.$broadcast('fileAdded');
