@@ -13,17 +13,16 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let getPatcherDisabled = function(patcher) {
-        let loadedFiles = xelib.GetLoadedFileNames(),
-            requiredFiles = patcher.requiredFiles || [];
-        return requiredFiles.subtract(loadedFiles).length > 0;
+        let requiredFiles = patcher.requiredFiles || [];
+        return requiredFiles.subtract(patcher.filesToPatch).length > 0;
     };
 
     let getDisabledHint = function(patcher) {
-        let loadedFiles = xelib.GetLoadedFileNames(),
+        let filesToPatch = patcher.filesToPatch,
             requiredFiles = patcher.requiredFiles || [],
             hint = 'This patcher is disabled because the following required' +
-                '\r\nfiles are not loaded:';
-        requiredFiles.subtract(loadedFiles).forEach(function(filename) {
+                '\r\nfiles are not available to the patch plugin:';
+        requiredFiles.subtract(filesToPatch).forEach(function(filename) {
             hint += `\r\n - ${filename}`;
         });
         return hint;
@@ -116,13 +115,13 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 
     this.getFilesToPatch = function(patcher) {
         let patcherSettings = service.settings[patcher.info.id],
-            ignored = patcherSettings.ignoredFiles;
-        filesToPatch = xelib.GetLoadedFileNames().filter(function(filename) {
-            return !filename.endsWith('.Hardcoded.dat');
-        });
+            ignored = patcherSettings.ignoredFiles,
+            filesToPatch = xelib.GetLoadedFileNames(),
+            patchFileName = patcherSettings.patchFileName,
+            patchFileIndex = filesToPatch.indexOf(patchFileName);
+        if (patchFileIndex > -1) filesToPatch.splice(patchFileIndex);
         if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
-        filesToPatch = filesToPatch.subtract(ignored);
-        return filesToPatch;
+        return filesToPatch.subtract(ignored);
     };
 
     this.updateFilesToPatch = function() {
