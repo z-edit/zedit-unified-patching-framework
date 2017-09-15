@@ -1,11 +1,15 @@
 ngapp.controller('buildPatchesController', function($scope, $q, patcherService, patchBuilder) {
     // helper functions
-    let getNewPatchFilename = function() {
+    let getUsedFileNames = function() {
         let patchFileNames = $scope.patchPlugins.map(function(patchPlugin) {
-                return patchPlugin.filename;
-            }),
-            usedFileNames = xelib.GetLoadedFileNames().concat(patchFileNames);
-        let patchFileName = 'Patch.esp',
+            return patchPlugin.filename;
+        });
+        return xelib.GetLoadedFileNames(false).concat(patchFileNames);
+    };
+
+    let getNewPatchFilename = function() {
+        let usedFileNames = getUsedFileNames(),
+            patchFileName = 'Patch.esp',
             counter = 1;
         while (usedFileNames.includes(patchFileName)) {
             patchFileName = `Patch ${++counter}.esp`;
