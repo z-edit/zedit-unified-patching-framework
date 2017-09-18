@@ -55,7 +55,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
             progressDone(activePatchPlugins);
             cache = {};
             xelib.FreeHandleGroup();
-            $rootScope.$broadcast('fileAdded');
+            $rootScope.$broadcast('reloadGUI');
         }, 50);
     };
 });
