@@ -12,10 +12,6 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
             progressMessage(message);
         };
 
-        let getOrCreatePatchRecord = function(record) {
-            return xelib.AddElement(patchFile, xelib.GetHexFormID(record));
-        };
-
         let getFile = function(filename) {
             if (!cache[filename])
                 cache[filename] = { handle: xelib.FileByName(filename) };
@@ -37,7 +33,9 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
 
         let loadRecords = function(filename, signature, recordsContext) {
             patcherProgress(`Loading ${recordsContext}.`);
-            return getRecords(filename, signature, false);
+            return getRecords(filename, signature, false).map(function(record) {
+                return xelib.GetPreviousOverride(record, patchFile);
+            });
         };
 
         let filterRecords = function(records, filterFn, recordsContext) {
@@ -63,7 +61,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
                 recordsContext = getRecordsContext(signature, filename);
             patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
             recordsToPatch.forEach(function(record) {
-                let patchRecord = getOrCreatePatchRecord(record);
+                let patchRecord = xelib.CopyElement(record, patchFile, false);
                 patchFn(patchRecord, helpers, patcherSettings, locals);
             });
         };
