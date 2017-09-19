@@ -1,7 +1,4 @@
-ngapp.controller('managePatchersModalController', function($scope, patcherService, modalService) {
-    // inherited functions
-    modalService.buildUnfocusModalFunction($scope, 'closeModal');
-
+ngapp.controller('managePatchersModalController', function($scope, patcherService) {
     // helper functions
     let selectTab = function(tab) {
         $scope.tabs.forEach((tab) => tab.selected = false);
