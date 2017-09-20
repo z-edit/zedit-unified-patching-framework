@@ -9,7 +9,7 @@
     }
 </style>
 
-<div class="modal-container" ng-click="unfocusModal($event)">
+<div class="modal-container" unfocus-modal="closeModal()">
     <div class="modal tabs-modal" ng-click="$broadcast('parentClick', $event)" ng-keydown="$broadcast('keyDown', $event)" tabindex="0" autofocus>
         <div class="close-modal" ng-click="closeModal()"></div>
 
