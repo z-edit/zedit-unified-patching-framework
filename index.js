@@ -137,10 +137,7 @@ ngapp.controller('ignorePluginsController', function($scope, patcherService) {
         return {filename: filename};
     });
 });
-ngapp.controller('managePatchersModalController', function($scope, patcherService, modalService) {
-    // inherited functions
-    modalService.buildUnfocusModalFunction($scope, 'closeModal');
-
+ngapp.controller('managePatchersModalController', function($scope, patcherService) {
     // helper functions
     let selectTab = function(tab) {
         $scope.tabs.forEach((tab) => tab.selected = false);
@@ -528,9 +525,9 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
         let cleanPatchFile = function(patchFile) {
             patcherProgress('Removing ITPOs and cleaning masters.');
             try {
-                xelib.RemoveIdenticalRecords(patchFile);
+                xelib.RemoveIdenticalRecords(patchFile, false, true);
             } catch (x) {
-                console.log('Removing ITPOs failed, ' + x.message);
+                progressService.logMessage('Removing ITPOs failed: ' + x.message);
             }
             xelib.CleanMasters(patchFile);
         };
