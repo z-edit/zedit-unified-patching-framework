@@ -32,12 +32,27 @@ ngapp.run(function(settingsService) {
     });
 });
 
+// register button
+let managePatchersButton = {
+    class: 'fa fa-puzzle-piece',
+    title: 'Manage Patchers',
+    hidden: true,
+    onClick: (scope) => openManagePatchersModal(scope)
+};
+ngapp.run(function(buttonFactory) {
+    buttonFactory.buttons.unshift(managePatchersButton);
+});
+
 // register for events
 ngapp.run(function($rootScope, patcherService) {
     $rootScope.$on('sessionStarted', function(e, selectedProfile) {
         patcherService.updateForGameMode(selectedProfile.gameMode);
     });
-    $rootScope.$on('filesLoaded', patcherService.loadSettings);
+
+    $rootScope.$on('filesLoaded', function() {
+        patcherService.loadSettings();
+        $rootScope.$applyAsync(() => managePatchersButton.hidden = false);
+    });
 });
 
 // register deferred module loader
