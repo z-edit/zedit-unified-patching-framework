@@ -19,6 +19,9 @@ gulp.task('build', ['clean'], function() {
     gulp.src('images/*')
         .pipe(gulp.dest('dist/images'));
 
+    gulp.src('docs/*')
+        .pipe(gulp.dest('dist/docs'));
+
     gulp.src('module.json')
         .pipe(gulp.dest('dist'));
 });
