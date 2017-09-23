@@ -1,0 +1,35 @@
+<h1>Unified Patching Framework</h1>
+
+<p>The Unified Patching Framework (UPF) is a core module provided with zEdit.  It provides an API for patchers - programs which generate patch plugins.  It's similar to SkyProc, SUM, and MXPF, though there are some key differences.</p>
+
+<h2>Game support</h2>
+<p>UPF works with all games zEdit supports:</p>
+
+<ul>
+    <li ng-repeat="game in games">{{::game.longName}}</li>
+</ul>
+
+<h2>Language</h2>
+<p>UPF patchers use the same framework used for <a ng-click="navigateTo('Modules')">zEdit Modules</a>.  Like zEdit modules, they are coded in ES6 JavaScript and can use AngularJS, HTML, and CSS to create user interfaces.</p>
+
+<p>ES6 JavaScript is a modern language which empowers developers to use functional and object oriented programming through classes, anonymous functions, and more.</p>
+
+<h2>API</h2>
+<p>UPF patchers use the <a ng-click="navigateTo('Development/APIs/xelib')">xelib</a> API.  This is the same API that's used throughout zEdit.  The API is very carefully designed, and offers a wide range of both generic and specific functions which make it easy to edit and build plugin files.</p>
+
+<p>UPF patchers are built with the <a ng-click="navigateTo('Development/APIs/UPF Patcher API')">UPF Patcher API</a>, which provides a highly structured system for defining patcher behavior.  The system allows users to manage all of their patchers and patcher settings from a single modal - the <a ng-click="navigateTo('Modal Views/Manage Patchers Modal')">manage patchers modal</a>.  Each patcher registers its own tab on the modal from which users can edit settings associated with it.</p>
+
+<p>UPF handles the majority of the patching process out of the box, requiring developers to only write the code which is specific to their patcher.  Developers can easily blacklist files to never be processed by their patcher, or require files to always be loaded for their patcher to be run.</p>
+
+<p>UPF allows users to specify the filename of the plugin a patcher should generate, and allows single plugin files to be generated from multiple patchers.  UPF's default behavior is to direct the output of all patchers to a single plugin file: zPatch.esp.  Developers can override this behavior to have their patcher generate a unique plugin file by default.</p>
+
+<p>UPF allows users to disable individual patchers without uninstalling them, and to customize the plugin files ignored by specific patchers.</p>
+
+<h2>Read more</h2>
+<p>You can read more about UPF on the following pages:</p>
+
+<ul>
+    <li ng-repeat="page in upfPages">
+        <a ng-click="navigateTo(page.path)">{{::page.label}}</a>
+    </li>
+</ul>
