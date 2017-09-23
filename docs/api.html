@@ -1,0 +1,17 @@
+<h1>UPF Patcher API</h1>
+
+<h2>Patcher Modules</h2>
+<p>UPF patchers are <a ng-click="navigateTo('Modules/Patcher Modules')">Patcher Modules</a>, and must specify the <code>UPF</code> module loader in their module.json file.  All patcher modules should register a patcher using the <code>registerPatcher</code> function.</p>
+
+<h2>Patcher Schema</h2>
+<p>Patchers can be implemented using JavaScript classes or objects.  You can choose which to use at your own discretion.  Regardless of your choice, your patcher must conform to the following schema:</p>
+
+<api-items items="patcherSchema"></api-items>
+
+<h2>Patcher Helpers</h2>
+<p>Helpers which you can use at any point in your patcher's execution.</p>
+
+<api-items namespace="helpers" items="patcherHelpers"></api-items>
+
+<h2>Patcher Locals</h2>
+<p>The locals object is passed to all patcher functions.  The locals object allows you to persist variables across all steps of your patcher's execution.  It's recommended to use the locals object over using variables defined directly in your module because the locals object does not persist between patcher executions.</p>
