@@ -15,12 +15,13 @@ ngapp.controller('upfOverviewController', function($scope) {
 
 ngapp.controller('upfPatcherApiController', function($scope) {
     ['patcherSchema', 'patcherHelpers'].forEach(function(label) {
-        $scope[label] = fh.loadJsonFile(`${modulePath}/docs/${label}.json`);
+        let path = `modules/${info.id}/docs/${label}.json`;
+        $scope[label] = fh.loadJsonFile(path);
     });
 });
 
 ngapp.controller('patcherModulesController', function($scope) {
-    let path = `${patcherPath}/docs/patcherVariables.json`;
+    let path = `modules/${info.id}/docs/patcherVariables.json`;
     $scope.patcherVariables = fh.loadJsonFile(path);
 });
 
