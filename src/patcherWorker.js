@@ -4,8 +4,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
 
         // helper functions
         let progressMessage = (title) => progressService.progressMessage(title);
-        let logMessage = (title) => progressService.logMessage(title);
-        let addProgress = (title) => progressService.addProgress(title);
+        let logMessage = (msg) => progressService.logMessage(msg);
+        let addProgress = (num) => progressService.addProgress(num);
 
         let patcherProgress = function(message) {
             addProgress(1);
