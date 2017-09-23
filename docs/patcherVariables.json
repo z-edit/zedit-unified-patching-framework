@@ -1,0 +1,31 @@
+[
+  {
+    "name": "registerPatcher",
+    "args": [{
+      "name": "patcher",
+      "type": "object",
+      "description": "Patcher to register."
+    }],
+    "description": "Function to register your patcher.  Call this function with an patcher object or class as an argument.  See the patcher schema for more details."
+  },
+  {
+    "name": "fh",
+    "type": "object",
+    "description": "The [fileHelpers API](Development/APIs/File Helpers)."
+  },
+  {
+    "name": "info",
+    "type": "object",
+    "description": "Object containing information about your patcher module.  Basically just your module.json."
+  },
+  {
+    "name": "patcherPath",
+    "type": "string",
+    "description": "`file://` URL for the folder where your patcher module is installed on the user's machine.  Should be prepended to any HTML template/resource URLs."
+  },
+  {
+    "name": "xelib",
+    "type": "object",
+    "description": "The [xelib API](Development/APIs/xelib)."
+  }
+]
