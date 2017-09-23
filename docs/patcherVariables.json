@@ -1,12 +1,13 @@
 [
   {
     "name": "registerPatcher",
+    "type": "function",
     "args": [{
       "name": "patcher",
       "type": "object",
       "description": "Patcher to register."
     }],
-    "description": "Function to register your patcher.  Call this function with an patcher object or class as an argument.  See the patcher schema for more details."
+    "description": "Function to register your patcher.  Call this function with a patcher object or class as an argument.  See the patcher schema for more details."
   },
   {
     "name": "fh",

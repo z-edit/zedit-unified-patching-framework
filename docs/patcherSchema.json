@@ -22,7 +22,7 @@
       {
         "name": "templateUrl",
         "type": "string",
-        "description": "URL to the HTML template to use for the settings tab.  You'll want to include the `patcherPath` in this URL.  E.g. `\`${patcherPath}/partials/settings.html\``."
+        "description": "URL to the HTML template to use for the settings tab.  You'll want to include the `patcherPath` in this URL.  E.g. ``${patcherPath}/partials/settings.html``."
       },
       {
         "name": "controller",
@@ -42,7 +42,8 @@
     "description": "Optional array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
   },
   {
-    "name": "requiredFiles",
+    "name": "getFilesToPatch",
+    "type": "function",
     "args": [{
       "name": "filenames",
       "type": "array of string",
@@ -55,10 +56,11 @@
   },
   {
     "name": "execute",
-    "type": "array",
+    "type": "object",
     "items": [
       {
         "name": "initialize",
+        "type": "function",
         "args": [{
           "name": "patch",
           "type": "handle",
@@ -81,10 +83,12 @@
       {
         "name": "process",
         "type": "array of object",
-        "description": "Array of process blocks. executed sequentially.  See the process block schema below for more information.",
+        "description": "Array of process blocks which are executed sequentially.  See the process block schema below for more information.",
+        "itemsLabel": "Process Block Schema",
         "items": [
           {
             "name": "load",
+            "type": "function",
             "args": [{
               "name": "plugin",
               "type": "handle",
@@ -106,7 +110,7 @@
               "type": "object"
             },
             "description": "Called for each plugin to patch.  Return null or undefined to skip loading records from the plugin, else return a load options object.  Loaded records which pass `filter` will be copied to the patch plugin, and then passed to the `patch` function below.",
-            "itemsLabel": "",
+            "itemsLabel": "Load Options Object",
             "items": [
               {
                 "name": "signature",
@@ -115,6 +119,7 @@
               },
               {
                 "name": "filter",
+                "type": "function",
                 "args": [{
                   "name": "record",
                   "type": "handle"
@@ -128,6 +133,7 @@
           },
           {
             "name": "patch",
+            "type": "function",
             "args": [{
               "name": "record",
               "type": "handle",
@@ -151,6 +157,7 @@
       },
       {
         "name": "finalize",
+        "type": "function",
         "args": [{
           "name": "patch",
           "type": "handle",

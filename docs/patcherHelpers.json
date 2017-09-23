@@ -1,6 +1,7 @@
 [
   {
     "name": "loadRecords",
+    "type": "function",
     "args": [{
       "name": "search",
       "type": "string",
@@ -22,6 +23,7 @@
   },
   {
     "name": "logMessage",
+    "type": "function",
     "args": [{
       "name": "message",
       "type": "string"
