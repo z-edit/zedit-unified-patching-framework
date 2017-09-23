@@ -1,4 +1,4 @@
-let upfOverviewController = function($scope) {
+ngapp.controller('upfOverviewController', function($scope) {
     $scope.games = xelib.games;
     $scope.upfPages = [
         'Development/APIs/UPF Patcher API',
@@ -11,32 +11,32 @@ let upfOverviewController = function($scope) {
             path: path
         };
     });
-};
+});
 
-let upfPatcherApiController = function($scope) {
+ngapp.controller('upfPatcherApiController', function($scope) {
     ['patcherSchema', 'patcherHelpers'].forEach(function(label) {
-        $scope[label] = fh.loadJsonFile(`${patcherPath}/docs/${label}.json`);
+        $scope[label] = fh.loadJsonFile(`${modulePath}/docs/${label}.json`);
     });
-};
+});
 
-let patcherModulesController = function($scope) {
+ngapp.controller('patcherModulesController', function($scope) {
     let path = `${patcherPath}/docs/patcherVariables.json`;
     $scope.patcherVariables = fh.loadJsonFile(path);
-};
+});
 
 let topics = [{
     path: 'Modules/Core Modules',
     topic: {
         label: 'Unified Patching Framework',
         templateUrl: `${modulePath}/docs/overview.html`,
-        controller: upfOverviewController
+        controller: 'upfOverviewController'
     }
 }, {
     path: 'Modules',
     topic: {
         label: 'Patcher Modules',
         templateUrl: `${modulePath}/docs/patcherModules.html`,
-        controller: patcherModulesController
+        controller: 'patcherModulesController'
     }
 }, {
     path: 'Modal Views',
@@ -59,7 +59,7 @@ let topics = [{
     topic: {
         label: 'UPF Patcher API',
         templateUrl: `${modulePath}/docs/api.html`,
-        controller: upfPatcherApiController
+        controller: 'upfPatcherApiController'
     }
 }];
 
