@@ -14,8 +14,4 @@
 <h2>Navigation</h2>
 <p>You can read further documentation on the tabs available in the manager patchers modal at the pages below:</p>
 
-<ul>
-    <li ng-repeat="child in currentTopic.children">
-        <a ng-click="navigateToChild(child)">{{::child.label}}</a>
-    </li>
-</ul>
+<children-topics></children-topics>

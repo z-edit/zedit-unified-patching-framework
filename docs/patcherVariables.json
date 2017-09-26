@@ -12,7 +12,7 @@
   {
     "name": "fh",
     "type": "object",
-    "description": "The [fileHelpers API](Development/APIs/File Helpers)."
+    "description": "The [fileHelpers API](docs://Development/APIs/File Helpers)."
   },
   {
     "name": "info",
@@ -27,6 +27,6 @@
   {
     "name": "xelib",
     "type": "object",
-    "description": "The [xelib API](Development/APIs/xelib)."
+    "description": "The [xelib API](docs://Development/APIs/xelib)."
   }
 ]
