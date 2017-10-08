@@ -93,7 +93,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     this.loadSettings = function() {
         let profileName = settingsService.currentProfile;
         service.settingsPath = `profiles/${profileName}/patcherSettings.json`;
-        let settings = fh.loadJsonFile(service.settingsPath, {});
+        let settings = fh.loadJsonFile(service.settingsPath) || {};
         service.settings = buildSettings(settings);
         service.saveSettings();
         buildTabs();
