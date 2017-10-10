@@ -7,12 +7,12 @@
   {
     "name": "gameModes",
     "type": "array of integer",
-    "description": "Array of the game modes your patcher can be used with.  Game modes are defined in xelib's [gameModes enumeration](Development/APIs/xelib/Setup)."
+    "description": "Array of the game modes your patcher can be used with.  Game modes are defined in xelib's [gameModes enumeration](docs://Development/APIs/xelib/Setup)."
   },
   {
     "name": "settings",
     "type": "object",
-    "description": "The patcher settings schema is used to register a settings tab for your patcher in the [manage patchers modal](Modal Views/Manage Patchers Modal).",
+    "description": "The patcher settings schema is used to register a settings tab for your patcher in the [manage patchers modal](docs://Modal Views/Manage Patchers Modal).",
     "items": [
       {
         "name": "label",
@@ -52,7 +52,7 @@
     "returns": {
       "type": "array of string"
     },
-    "description": "Optional function which allows you to exclude certain files from patching.  The array of filenames you return from the function will be the base file selection used by the patcher.  You can use [Array.prototype.subtract](Development/APIs/Polyfills) to remove files from the passed filenames array easily."
+    "description": "Optional function which allows you to exclude certain files from patching.  The array of filenames you return from the function will be the base file selection used by the patcher.  You can use [Array.prototype.subtract](docs://Development/APIs/Polyfills) to remove files from the passed filenames array easily."
   },
   {
     "name": "execute",
