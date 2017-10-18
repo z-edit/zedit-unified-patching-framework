@@ -1,0 +1,182 @@
+[
+  {
+    "name": "info",
+    "type": "object",
+    "description": "Your patcher module information.  You should use the `info` variable as the value here."
+  },
+  {
+    "name": "gameModes",
+    "type": "array of integer",
+    "description": "Array of the game modes your patcher can be used with.  Game modes are defined in xelib's [gameModes enumeration](docs://Development/APIs/xelib/Setup)."
+  },
+  {
+    "name": "settings",
+    "type": "object",
+    "description": "The patcher settings schema is used to register a settings tab for your patcher in the [manage patchers modal](docs://Modal Views/Manage Patchers Modal).",
+    "items": [
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The label used for the tab in the manage patchers modal."
+      },
+      {
+        "name": "templateUrl",
+        "type": "string",
+        "description": "URL to the HTML template to use for the settings tab.  You'll want to include the `patcherPath` in this URL.  E.g. ``${patcherPath}/partials/settings.html``."
+      },
+      {
+        "name": "controller",
+        "type": "string",
+        "description": "Optional name of the controller to use on the settings tab."
+      },
+      {
+        "name": "defaultSettings",
+        "type": "object",
+        "description": "Object containing the default values for your patcher's settings.  Settings can be any type.  You should provide a default value for every setting your patcher supports."
+      }
+    ]
+  },
+  {
+    "name": "requiredFiles",
+    "type": "array of string",
+    "description": "Optional array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
+  },
+  {
+    "name": "getFilesToPatch",
+    "type": "function",
+    "args": [{
+      "name": "filenames",
+      "type": "array of string",
+      "description": "The filenames of all files available for your patcher to patch."
+    }],
+    "returns": {
+      "type": "array of string"
+    },
+    "description": "Optional function which allows you to exclude certain files from patching.  The array of filenames you return from the function will be the base file selection used by the patcher.  You can use [Array.prototype.subtract](docs://Development/APIs/Polyfills) to remove files from the passed filenames array easily."
+  },
+  {
+    "name": "execute",
+    "type": "object",
+    "items": [
+      {
+        "name": "initialize",
+        "type": "function",
+        "args": [{
+          "name": "patch",
+          "type": "handle",
+          "description": "Handle for the patch plugin your patcher is using."
+        }, {
+          "name": "helpers",
+          "type": "object",
+          "description": "Patcher helpers."
+        }, {
+          "name": "settings",
+          "type": "object",
+          "description": "Your patcher's settings."
+        }, {
+          "name": "locals",
+          "type": "object",
+          "description": "Patcher locals."
+        }],
+        "description": "Called before processing.  Perform anything that needs to be done at the beginning of the patcher's execution in this function.  This step is often used to load records which but need to be used in the patching process."
+      },
+      {
+        "name": "process",
+        "type": "array of object",
+        "description": "Array of process blocks which are executed sequentially.  See the process block schema below for more information.",
+        "itemsLabel": "Process Block Schema",
+        "items": [
+          {
+            "name": "load",
+            "type": "function",
+            "args": [{
+              "name": "plugin",
+              "type": "handle",
+              "description": "Handle for the plugin to patch."
+            }, {
+              "name": "helpers",
+              "type": "object",
+              "description": "Patcher helpers."
+            }, {
+              "name": "settings",
+              "type": "object",
+              "description": "Your patcher's settings."
+            }, {
+              "name": "locals",
+              "type": "object",
+              "description": "Patcher locals."
+            }],
+            "returns": {
+              "type": "object"
+            },
+            "description": "Called for each plugin to patch.  Return null or undefined to skip loading records from the plugin, else return a load options object.  Loaded records which pass `filter` will be copied to the patch plugin, and then passed to the `patch` function below.",
+            "itemsLabel": "Load Options Object",
+            "items": [
+              {
+                "name": "signature",
+                "type": "string",
+                "description": "Record signatures to load separated by commas."
+              },
+              {
+                "name": "filter",
+                "type": "function",
+                "args": [{
+                  "name": "record",
+                  "type": "handle"
+                }],
+                "returns": {
+                  "type": "boolean"
+                },
+                "description": "Optional filter function.  Called for each loaded record.  Return false to skip patching a record."
+              }
+            ]
+          },
+          {
+            "name": "patch",
+            "type": "function",
+            "args": [{
+              "name": "record",
+              "type": "handle",
+              "description": "Handle for the patch record."
+            }, {
+              "name": "helpers",
+              "type": "object",
+              "description": "Patcher helpers."
+            }, {
+              "name": "settings",
+              "type": "object",
+              "description": "Your patcher's settings."
+            }, {
+              "name": "locals",
+              "type": "object",
+              "description": "Patcher locals."
+            }],
+            "description": "Called for each record copied to the patch plugin.  This is the step where you set values on the record."
+          }
+        ]
+      },
+      {
+        "name": "finalize",
+        "type": "function",
+        "args": [{
+          "name": "patch",
+          "type": "handle",
+          "description": "Handle for the patch plugin your patcher is using."
+        }, {
+          "name": "helpers",
+          "type": "object",
+          "description": "Patcher helpers."
+        }, {
+          "name": "settings",
+          "type": "object",
+          "description": "Your patcher's settings."
+        }, {
+          "name": "locals",
+          "type": "object",
+          "description": "Patcher locals."
+        }],
+        "description": "Called after processing.  Can be used to perform any cleanup/final steps once your patcher has finished executing.  Note that UPF automatically removes ITPO records and unused masters, so you don't need to do that here."
+      }
+    ]
+  }
+]

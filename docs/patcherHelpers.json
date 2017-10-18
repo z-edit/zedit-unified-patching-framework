@@ -1,0 +1,33 @@
+[
+  {
+    "name": "loadRecords",
+    "type": "function",
+    "args": [{
+      "name": "search",
+      "type": "string",
+      "description": "Records to search for.  See xelib.GetRecords for more information."
+    }, {
+      "name": "includeOverrides",
+      "type": "boolean",
+      "description": "Pass true to load both master and override records.  Default false."
+    }],
+    "returns": {
+      "type": "array of handle"
+    },
+    "description": "Helper function which allows you to load records from the files your patcher is targetting."
+  },
+  {
+    "name": "allSettings",
+    "type": "object",
+    "description": "Contains the settings of all patchers, with each patcher's settings in a property corresponding to their id.  Use this if you need to change your patcher's behavior when a user is using another patcher."
+  },
+  {
+    "name": "logMessage",
+    "type": "function",
+    "args": [{
+      "name": "message",
+      "type": "string"
+    }],
+    "description": "Call this function to print a message to the progress modal's log."
+  }
+]
