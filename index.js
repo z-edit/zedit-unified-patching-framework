@@ -1,9 +1,9 @@
 /* global ngapp, xelib, modulePath, moduleService */
 // helper variables and functions
 const openManagePatchersModal = function(scope) {
-  scope.$emit('openModal', 'managePatchers', {
-      basePath: `${modulePath}/partials`
-  });
+    scope.$emit('openModal', 'managePatchers', {
+        basePath: `${modulePath}/partials`
+    });
 };
 //=require src/*.js
 // add manage patchers context menu item to tree view context menu
