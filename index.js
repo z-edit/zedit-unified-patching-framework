@@ -1,9 +1,9 @@
 /* global ngapp, xelib, modulePath, moduleService */
 // helper variables and functions
 const openManagePatchersModal = function(scope) {
-  scope.$emit('openModal', 'managePatchers', {
-      basePath: `${modulePath}/partials`
-  });
+    scope.$emit('openModal', 'managePatchers', {
+        basePath: `${modulePath}/partials`
+    });
 };
 ngapp.controller('buildPatchesController', function($scope, $q, patcherService, patchBuilder) {
     // helper functions
