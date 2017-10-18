@@ -16,7 +16,7 @@ ngapp.run(function(contextMenuFactory) {
         build: (scope, items) => {
             items.push({
                 label: 'Manage Patchers',
-                hotkey: 'Ctrl+P',
+                hotkey: 'Ctrl+Shift+P',
                 callback: () => openManagePatchersModal(scope)
             });
         }
@@ -29,6 +29,16 @@ ngapp.run(function(settingsService) {
         label: 'Unified Patching Framework',
         templateUrl: `${modulePath}/partials/settings.html`,
         controller: 'upfSettingsController'
+    });
+});
+
+// register hotkey
+ngapp.run(function(hotkeyFactory) {
+    hotkeyFactory.addHotkeys('editView', {
+        p: [{
+            modifiers: ['ctrlKey', 'shiftKey'],
+            callback: openManagePatchersModal
+        }]
     });
 });
 
