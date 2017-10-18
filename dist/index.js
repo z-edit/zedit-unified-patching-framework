@@ -320,7 +320,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     this.loadSettings = function() {
         let profileName = settingsService.currentProfile;
         service.settingsPath = `profiles/${profileName}/patcherSettings.json`;
-        let settings = fh.loadJsonFile(service.settingsPath, {});
+        let settings = fh.loadJsonFile(service.settingsPath) || {};
         service.settings = buildSettings(settings);
         service.saveSettings();
         buildTabs();
@@ -381,8 +381,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
 
         // helper functions
         let progressMessage = (title) => progressService.progressMessage(title);
-        let logMessage = (title) => progressService.logMessage(title);
-        let addProgress = (title) => progressService.addProgress(title);
+        let logMessage = (msg) => progressService.logMessage(msg);
+        let addProgress = (num) => progressService.addProgress(num);
 
         let patcherProgress = function(message) {
             addProgress(1);
@@ -543,6 +543,75 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
         cleanPatchFile(patchFile);
     };
 });
+ngapp.controller('upfOverviewController', function($scope) {
+    $scope.games = xelib.games;
+    $scope.upfPages = [
+        'Development/APIs/UPF Patcher API',
+        'Modal Views/Manage Patchers Modal',
+        'Modules/Patcher Modules',
+        'Modal Views/Settings Modal/UPF Settings Tab'
+    ].map(function(path) {
+        return {
+            label: path.split('/').last(),
+            path: path
+        };
+    });
+});
+
+ngapp.controller('upfPatcherApiController', function($scope) {
+    ['patcherSchema', 'patcherHelpers'].forEach(function(label) {
+        let path = `modules/${info.id}/docs/${label}.json`;
+        $scope[label] = fh.loadJsonFile(path);
+    });
+});
+
+ngapp.controller('patcherModulesController', function($scope) {
+    let path = `modules/${info.id}/docs/patcherVariables.json`;
+    $scope.patcherVariables = fh.loadJsonFile(path);
+});
+
+let topics = [{
+    path: 'Modules/Core Modules',
+    topic: {
+        label: 'Unified Patching Framework',
+        templateUrl: `${modulePath}/docs/overview.html`,
+        controller: 'upfOverviewController'
+    }
+}, {
+    path: 'Modules',
+    topic: {
+        label: 'Patcher Modules',
+        templateUrl: `${modulePath}/docs/patcherModules.html`,
+        controller: 'patcherModulesController'
+    }
+}, {
+    path: 'Modal Views',
+    topic: {
+        label: 'Manage Patchers Modal',
+        templateUrl: `${modulePath}/docs/managePatchersModal.html`,
+        children: [{
+            label: 'Build Patches Tab',
+            templateUrl: `${modulePath}/docs/buildPatches.html`
+        }]
+    }
+}, {
+    path: 'Modal Views/Settings Modal',
+    topic: {
+        label: 'UPF Settings Tab',
+        templateUrl: `${modulePath}/docs/upfSettings.html`
+    }
+}, {
+    path: 'Development/APIs',
+    topic: {
+        label: 'UPF Patcher API',
+        templateUrl: `${modulePath}/docs/api.html`,
+        controller: 'upfPatcherApiController'
+    }
+}];
+
+ngapp.run(function(helpService) {
+    topics.forEach(({path, topic}) => helpService.addTopic(topic, path));
+});
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.bannerStyle = {
         'background': `url('${modulePath}/images/banner.jpg')`,
@@ -564,7 +633,7 @@ ngapp.run(function(contextMenuFactory) {
         build: (scope, items) => {
             items.push({
                 label: 'Manage Patchers',
-                hotkey: 'Ctrl+P',
+                hotkey: 'Ctrl+Shift+P',
                 callback: () => openManagePatchersModal(scope)
             });
         }
@@ -580,12 +649,37 @@ ngapp.run(function(settingsService) {
     });
 });
 
+// register hotkey
+ngapp.run(function(hotkeyFactory) {
+    hotkeyFactory.addHotkeys('editView', {
+        p: [{
+            modifiers: ['ctrlKey', 'shiftKey'],
+            callback: openManagePatchersModal
+        }]
+    });
+});
+
+// register button
+let managePatchersButton = {
+    class: 'fa fa-puzzle-piece',
+    title: 'Manage Patchers',
+    hidden: true,
+    onClick: (scope) => openManagePatchersModal(scope)
+};
+ngapp.run(function(buttonFactory) {
+    buttonFactory.buttons.unshift(managePatchersButton);
+});
+
 // register for events
 ngapp.run(function($rootScope, patcherService) {
     $rootScope.$on('sessionStarted', function(e, selectedProfile) {
         patcherService.updateForGameMode(selectedProfile.gameMode);
     });
-    $rootScope.$on('filesLoaded', patcherService.loadSettings);
+
+    $rootScope.$on('filesLoaded', function() {
+        patcherService.loadSettings();
+        $rootScope.$applyAsync(() => managePatchersButton.hidden = false);
+    });
 });
 
 // register deferred module loader
