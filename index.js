@@ -26,6 +26,7 @@ ngapp.run(function(contextMenuFactory) {
 // register settings tab
 ngapp.run(function(settingsService) {
     settingsService.registerSettings({
+        appModes: ['edit'],
         label: 'Unified Patching Framework',
         templateUrl: `${modulePath}/partials/settings.html`,
         controller: 'upfSettingsController'
