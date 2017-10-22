@@ -643,6 +643,7 @@ ngapp.run(function(contextMenuFactory) {
 // register settings tab
 ngapp.run(function(settingsService) {
     settingsService.registerSettings({
+        appModes: ['edit'],
         label: 'Unified Patching Framework',
         templateUrl: `${modulePath}/partials/settings.html`,
         controller: 'upfSettingsController'
@@ -677,6 +678,7 @@ ngapp.run(function($rootScope, patcherService) {
     });
 
     $rootScope.$on('filesLoaded', function() {
+        if ($rootScope.appMode !== 'edit') return;
         patcherService.loadSettings();
         $rootScope.$applyAsync(() => managePatchersButton.hidden = false);
     });
