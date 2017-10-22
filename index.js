@@ -61,6 +61,7 @@ ngapp.run(function($rootScope, patcherService) {
     });
 
     $rootScope.$on('filesLoaded', function() {
+        if ($rootScope.appMode !== 'edit') return;
         patcherService.loadSettings();
         $rootScope.$applyAsync(() => managePatchersButton.hidden = false);
     });
