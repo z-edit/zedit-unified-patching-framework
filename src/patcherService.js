@@ -48,8 +48,8 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let buildTabs = function() {
-        patchers.forEach((patcher) => {
-            if (patcher.settings) tabs.push(patcher.settings);
+        patchers.forEach(function(patcher) {
+            if (!patcher.settings.hide) tabs.push(patcher.settings);
         });
     };
 
