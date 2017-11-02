@@ -71,6 +71,34 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
     $scope.updatePatchStatuses();
 });
 
+ngapp.service('idCacheService', function(patcherService) {
+    let prepareIdCache = function(patchFile) {
+        let cache = patcherService.settings.cache,
+            fileName = xelib.Name(patchFile);
+        if (!cache.hasOwnProperty(fileName)) cache[fileName] = {};
+        return cache[fileName];
+    };
+
+    this.newRecord = function(patchFile) {
+        let idCache = prepareIdCache(patchFile),
+            forms = Object.values(idCache);
+
+        let getNewFormId = function() {
+            let form = xelib.GetNextObjectID(patchFile);
+            while (forms.includes(form)) form++;
+            forms.push(form);
+            return form;
+        };
+
+        return function(container, path, id) {
+            if (!idCache.hasOwnProperty(id)) idCache[id] = getNewFormId();
+            let rec = xelib.AddElement(container, path);
+            xelib.SetFormID(rec, idCache[id], true, false);
+            if (xelib.HasElement(rec, 'EDID')) xelib.SetValue(rec, 'EDID', id);
+            return rec;
+        };
+    };
+});
 ngapp.directive('ignorePlugins', function() {
     return {
         restrict: 'E',
@@ -265,7 +293,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let buildSettings = function(settings) {
-        let defaults = {};
+        let defaults = { cache: {} };
         patchers.forEach(function(patcher) {
             let patcherSettings = {};
             patcherSettings[patcher.info.id] = getDefaultSettings(patcher);
@@ -275,8 +303,8 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let buildTabs = function() {
-        patchers.forEach((patcher) => {
-            if (patcher.settings) tabs.push(patcher.settings);
+        patchers.forEach(function(patcher) {
+            if (!patcher.settings.hide) tabs.push(patcher.settings);
         });
     };
 
@@ -375,7 +403,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return patchPlugins;
     };
 });
-ngapp.service('patcherWorker', function(patcherService, progressService) {
+ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, patcher, patcherSettings, helpers, locals;
 
@@ -452,7 +480,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
             return {
                 loadRecords: loadRecords,
                 allSettings: patcherService.settings,
-                logMessage: logMessage
+                logMessage: logMessage,
+                newRecord: idCacheService.newRecord(patchFile)
             }
         };
 
@@ -625,7 +654,7 @@ ngapp.controller('upfSettingsController', function($timeout, $scope) {
 });
 // add manage patchers context menu item to tree view context menu
 ngapp.run(function(contextMenuFactory) {
-    let menuItems = contextMenuFactory.mainTreeItems,
+    let menuItems = contextMenuFactory.treeViewItems,
         automateIndex = menuItems.findIndex((item) => { return item.id === 'Automate'; });
     menuItems.splice(automateIndex + 1, 0, {
         id: 'Manage Patchers',

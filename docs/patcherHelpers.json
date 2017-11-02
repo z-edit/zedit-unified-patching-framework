@@ -29,5 +29,20 @@
       "type": "string"
     }],
     "description": "Call this function to print a message to the progress modal's log."
+  },
+  {
+    "name": "newRecord",
+    "type": "function",
+    "args": [{
+      "name": "container",
+      "type": "handle"
+    }, {
+      "name": "path",
+      "type": "string"
+    }, {
+      "name": "id",
+      "type": "string"
+    }],
+    "description": "Adds a new record to the input `container` at `path`.  Uses record consistency caching to make certain the record stays at the same Form ID when the patch gets regenerated.  This function should **always** be used when creating new records in a UPF patch file.  The `id` should be a unique string value for the record, typically the record's editor ID.  You should use a unique prefix for the id so there won't be collisions with other patchers.  The new record's editor ID will be set to `id` if the record has an Editor ID field."
   }
 ]
