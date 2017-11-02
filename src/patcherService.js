@@ -38,7 +38,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let buildSettings = function(settings) {
-        let defaults = {};
+        let defaults = { cache: {} };
         patchers.forEach(function(patcher) {
             let patcherSettings = {};
             patcherSettings[patcher.info.id] = getDefaultSettings(patcher);

@@ -1,4 +1,4 @@
-ngapp.service('patcherWorker', function(patcherService, progressService) {
+ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, patcher, patcherSettings, helpers, locals;
 
@@ -75,7 +75,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService) {
             return {
                 loadRecords: loadRecords,
                 allSettings: patcherService.settings,
-                logMessage: logMessage
+                logMessage: logMessage,
+                newRecord: idCacheService.newRecord(patchFile)
             }
         };
 
