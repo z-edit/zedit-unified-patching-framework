@@ -8,7 +8,7 @@ const openManagePatchersModal = function(scope) {
 //=require src/*.js
 // add manage patchers context menu item to tree view context menu
 ngapp.run(function(contextMenuFactory) {
-    let menuItems = contextMenuFactory.mainTreeItems,
+    let menuItems = contextMenuFactory.treeViewItems,
         automateIndex = menuItems.findIndex((item) => { return item.id === 'Automate'; });
     menuItems.splice(automateIndex + 1, 0, {
         id: 'Manage Patchers',
