@@ -17,9 +17,9 @@ ngapp.service('idCacheService', function(patcherService) {
             return form;
         };
 
-        return function(group, signature, id) {
+        return function(container, path, id) {
             if (!idCache.hasOwnProperty(id)) idCache[id] = getNewFormId();
-            let rec = xelib.AddElement(group, signature);
+            let rec = xelib.AddElement(container, path);
             xelib.SetFormID(rec, idCache[id], true, false);
             if (xelib.HasElement(rec, 'EDID')) xelib.SetValue(rec, 'EDID', id);
             return rec;
