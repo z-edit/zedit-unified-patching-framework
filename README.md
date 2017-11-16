@@ -5,6 +5,10 @@ A zEdit module which provides a framework for dynamic patch generation, similar 
 Check out the following patchers to get an idea of how to use UPF:
 
 - [Example Patcher](https://github.com/matortheeternal/zedit-example-patcher)
+- [No Dragon LODs](https://github.com/hishutup/hishy-no-dragon-lods)
+- [NPC Enchant Fix](https://github.com/hishutup/hishy-npc-enchant-fix)
+- [Cell Encounter Level in Name](https://github.com/hishutup/hishy-cell-encounter-level-in-name)
+- [Khajiit Ears Show](https://github.com/hishutup/hishy-khajiit-ears-show)
 - [Reproccer Reborn](https://github.com/jdsmith2816/reproccer-reborn)
 
 ## installation
