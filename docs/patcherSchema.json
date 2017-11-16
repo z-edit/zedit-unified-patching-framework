@@ -26,8 +26,8 @@
       },
       {
         "name": "controller",
-        "type": "string",
-        "description": "Optional name of the controller to use on the settings tab."
+        "type": "function",
+        "description": "Optional controller function for use on the settings tab.  Can use dependency injection per AngularJS."
       },
       {
         "name": "defaultSettings",
