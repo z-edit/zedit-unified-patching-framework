@@ -1,5 +1,7 @@
 ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
     this.run = function(cache, patchPlugin) {
+        let start = new Date();
+
         let progressTitle = function(title) {
             progressService.progressTitle(title);
         };
@@ -39,5 +41,6 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
             patcherWorker.run(cache, patchFileName, patchFile, patcher);
         });
         cleanPatchFile(patchFile);
+        console.log(`Generated ${patchFileName} in ${new Date() - start}ms`);
     };
 });
