@@ -4,12 +4,12 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
 
     let getMaxProgress = function(patchPlugin) {
-        return patchPlugin.patchers.map(function(patcher) {
-            return patcherService.getPatcher(patcher.id);
-        }).reduce(function(sum, patcher) {
-            let numProcessTasks = 3 * patcher.execute.process.length;
-            return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
-        }, 1);
+        return patchPlugin.patchers.filterOnKey('active').mapOnKey('id')
+            .map(patcherService.getPatcher)
+            .reduce(function(sum, patcher) {
+                let numProcessTasks = 3 * patcher.execute.process.length;
+                return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
+            }, 1);
     };
 
     let getTotalMaxProgress = function(patchPlugins) {
