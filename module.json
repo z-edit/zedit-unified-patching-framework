@@ -5,6 +5,6 @@
   "version": "0.6.0",
   "repo": "https://github.com/matortheeternal/zedit-unified-patching-framework",
   "released": "9/7/2017",
-  "updated": "11/2/2017",
+  "updated": "11/20/2017",
   "description": "A framework for dynamic patchers, similar to SkyProc/SUM."
 }
