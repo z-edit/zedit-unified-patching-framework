@@ -198,12 +198,12 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
 
     let getMaxProgress = function(patchPlugin) {
-        return patchPlugin.patchers.map(function(patcher) {
-            return patcherService.getPatcher(patcher.id);
-        }).reduce(function(sum, patcher) {
-            let numProcessTasks = 3 * patcher.execute.process.length;
-            return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
-        }, 1);
+        return patchPlugin.patchers.filterOnKey('active').mapOnKey('id')
+            .map(patcherService.getPatcher)
+            .reduce(function(sum, patcher) {
+                let numProcessTasks = 3 * patcher.execute.process.length;
+                return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
+            }, 1);
     };
 
     let getTotalMaxProgress = function(patchPlugins) {
@@ -531,6 +531,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 });
 ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
     this.run = function(cache, patchPlugin) {
+        let start = new Date();
+
         let progressTitle = function(title) {
             progressService.progressTitle(title);
         };
@@ -570,6 +572,7 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
             patcherWorker.run(cache, patchFileName, patchFile, patcher);
         });
         cleanPatchFile(patchFile);
+        console.log(`Generated ${patchFileName} in ${new Date() - start}ms`);
     };
 });
 ngapp.controller('upfOverviewController', function($scope) {
@@ -717,8 +720,11 @@ ngapp.run(function($rootScope, patcherService) {
 moduleService.deferLoader('UPF');
 ngapp.run(function(patcherService) {
     moduleService.registerLoader('UPF', function(module, fh) {
-        let argKeys = ['registerPatcher', 'fh', 'info', 'patcherPath'];
-        let fn = new Function(...argKeys, module.code);
-        fn(patcherService.registerPatcher, fh, module.info, module.path);
+        Function.execute({
+            registerPatcher: patcherService.registerPatcher,
+            fh: fh,
+            info: module.info,
+            patcherPath: module.path
+        }, module.code);
     });
 });
