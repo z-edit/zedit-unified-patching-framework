@@ -26,8 +26,9 @@
       },
       {
         "name": "controller",
-        "type": "string",
-        "description": "Optional name of the controller to use on the settings tab."
+        "type": "function",
+        "optional": true,
+        "description": "Controller function for use on the settings tab.  Can use dependency injection per AngularJS."
       },
       {
         "name": "defaultSettings",
@@ -39,11 +40,13 @@
   {
     "name": "requiredFiles",
     "type": "array of string",
-    "description": "Optional array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
+    "optional": true,
+    "description": "Array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
   },
   {
     "name": "getFilesToPatch",
     "type": "function",
+    "optional": true,
     "args": [{
       "name": "filenames",
       "type": "array of string",
@@ -52,7 +55,7 @@
     "returns": {
       "type": "array of string"
     },
-    "description": "Optional function which allows you to exclude certain files from patching.  The array of filenames you return from the function will be the base file selection used by the patcher.  You can use [Array.prototype.subtract](docs://Development/APIs/Polyfills) to remove files from the passed filenames array easily."
+    "description": "Function which allows you to exclude certain files from patching.  The array of filenames you return from the function will be the base file selection used by the patcher.  You can use [Array.prototype.subtract](docs://Development/APIs/Polyfills) to remove files from the passed filenames array easily."
   },
   {
     "name": "execute",
@@ -61,6 +64,7 @@
       {
         "name": "initialize",
         "type": "function",
+        "optional": true,
         "args": [{
           "name": "patch",
           "type": "handle",
@@ -120,6 +124,7 @@
               {
                 "name": "filter",
                 "type": "function",
+                "optional": true,
                 "args": [{
                   "name": "record",
                   "type": "handle"
@@ -127,7 +132,7 @@
                 "returns": {
                   "type": "boolean"
                 },
-                "description": "Optional filter function.  Called for each loaded record.  Return false to skip patching a record."
+                "description": "Filter function.  Called for each loaded record.  Return false to skip patching a record."
               }
             ]
           },
@@ -158,6 +163,7 @@
       {
         "name": "finalize",
         "type": "function",
+        "optional": true,
         "args": [{
           "name": "patch",
           "type": "handle",
