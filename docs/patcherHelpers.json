@@ -14,7 +14,7 @@
     "returns": {
       "type": "array of handle"
     },
-    "description": "Helper function which allows you to load records from the files your patcher is targetting."
+    "description": "Helper function which allows you to load records from the files your patcher is targeting."
   },
   {
     "name": "allSettings",
@@ -31,14 +31,11 @@
     "description": "Call this function to print a message to the progress modal's log."
   },
   {
-    "name": "newRecord",
+    "name": "cacheRecord",
     "type": "function",
     "args": [{
-      "name": "container",
+      "name": "rec",
       "type": "handle"
-    }, {
-      "name": "path",
-      "type": "string"
     }, {
       "name": "id",
       "type": "string"
@@ -46,6 +43,6 @@
     "returns": {
       "type": "handle"
     },
-    "description": "Adds a new record to the input `container` at `path`.  Uses record consistency caching to make certain the record stays at the same Form ID when the patch gets regenerated.  This function should **always** be used when creating new records in a UPF patch file.  The `id` should be a unique string value for the record, typically the record's editor ID.  You should use a unique prefix for the id so there won't be collisions with other patchers.  The new record's editor ID will be set to `id` if the record has an Editor ID field."
+    "description": "Uses record consistency caching to make certain the input record `rec` stays at the same Form ID when the patch gets regenerated.  This function should be used on all records created by UPF patchers, excluding overrides.  The `id` should be a unique string value for the record.  It is recommended to use a unique prefix for `id` to avoid collisions with other patchers.  The record's editor ID will be set to `id` if the record has an Editor ID field."
   }
 ]

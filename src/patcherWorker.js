@@ -76,8 +76,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 loadRecords: loadRecords,
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
-                newRecord: idCacheService.newRecord(patchFile)
-            }
+                cacheRecord: idCacheService.cacheRecord(patchFile)
+            };
         };
 
         let executeBlock = function(processBlock) {
