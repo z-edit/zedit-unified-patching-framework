@@ -79,20 +79,19 @@ ngapp.service('idCacheService', function(patcherService) {
         return cache[fileName];
     };
 
-    this.newRecord = function(patchFile) {
+    this.cacheRecord = function(patchFile) {
         let idCache = prepareIdCache(patchFile),
-            forms = Object.values(idCache);
+            forms = Object.values(idCache),
+            nextForm = xelib.GetNextObjectID(patchFile);
 
         let getNewFormId = function() {
-            let form = xelib.GetNextObjectID(patchFile);
-            while (forms.includes(form)) form++;
-            forms.push(form);
-            return form;
+            while (forms.includes(nextForm)) nextForm++;
+            forms.push(nextForm);
+            return nextForm++;
         };
 
-        return function(container, path, id) {
+        return function(rec, id) {
             if (!idCache.hasOwnProperty(id)) idCache[id] = getNewFormId();
-            let rec = xelib.AddElement(container, path);
             xelib.SetFormID(rec, idCache[id], true, false);
             if (xelib.HasElement(rec, 'EDID')) xelib.SetValue(rec, 'EDID', id);
             return rec;
@@ -481,8 +480,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 loadRecords: loadRecords,
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
-                newRecord: idCacheService.newRecord(patchFile)
-            }
+                cacheRecord: idCacheService.cacheRecord(patchFile)
+            };
         };
 
         let executeBlock = function(processBlock) {
