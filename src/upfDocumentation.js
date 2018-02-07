@@ -14,7 +14,8 @@ ngapp.controller('upfOverviewController', function($scope) {
 });
 
 ngapp.controller('upfPatcherApiController', function($scope) {
-    ['patcherSchema', 'patcherHelpers'].forEach(function(label) {
+    let apiFiles = ['patcherSchema', 'patcherHelpers', 'patcherSettings'];
+    apiFiles.forEach(function(label) {
         let path = `modules/${info.id}/docs/${label}.json`;
         $scope[label] = fh.loadJsonFile(path);
     });
