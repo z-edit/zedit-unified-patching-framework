@@ -18,11 +18,20 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             return cache[filename];
         };
 
+        let filterDeletedRecords = function(records) {
+            if (patcherSettings.processDeletedRecords) return records;
+            return records.filter(function(record) {
+                return !xelib.GetRecordFlag(record, 'Deleted');
+            });
+        };
+
         let getRecords = function(filename, search, overrides) {
             let file = getFile(filename),
                 cacheKey = `${search}_${+overrides}`;
-            if (!file[cacheKey])
-                file[cacheKey] = xelib.GetRecords(file.handle, search, overrides);
+            if (!file[cacheKey]) {
+                let records = xelib.GetRecords(file.handle, search, overrides);
+                file[cacheKey] = filterDeletedRecords(records);
+            }
             return file[cacheKey];
         };
 
