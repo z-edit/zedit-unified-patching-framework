@@ -25,13 +25,19 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             });
         };
 
+        let getPreviousOverrides = function(records) {
+            return records.map(function(record) {
+                return xelib.GetPreviousOverride(record, patchFile);
+            });
+        };
+
         let getRecords = function(filename, search, overrides) {
             let file = getFile(filename),
                 cacheKey = `${search}_${+overrides}`;
-            if (!file[cacheKey]) {
-                let records = xelib.GetRecords(file.handle, search, overrides);
-                file[cacheKey] = filterDeletedRecords(records);
-            }
+            if (!file[cacheKey])
+                file[cacheKey] = filterDeletedRecords(getPreviousOverrides(
+                    xelib.GetRecords(file.handle, search, overrides)
+                ));
             return file[cacheKey];
         };
 
@@ -42,9 +48,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let loadRecords = function(filename, signature, recordsContext) {
             patcherProgress(`Loading ${recordsContext}.`);
-            return getRecords(filename, signature, false).map(function(record) {
-                return xelib.GetPreviousOverride(record, patchFile);
-            });
+            return getRecords(filename, signature, false);
         };
 
         let filterRecords = function(records, filterFn, recordsContext) {
