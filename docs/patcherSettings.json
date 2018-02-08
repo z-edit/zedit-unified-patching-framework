@@ -5,11 +5,6 @@
     "description": "The FormID cache used for form ID consistency when the user regenerates the patch file.  You should never write directly to this setting."
   },
   {
-    "name": "hide",
-    "type": "boolean",
-    "description": "If set to true the patcher settings tab will not be displayed on the manage patchers modal."
-  },
-  {
     "name": "ignoredFiles",
     "type": "array of string",
     "description": "Array of filenames to ignore when patching.  The `ignore-plugins` directive sets this value."
