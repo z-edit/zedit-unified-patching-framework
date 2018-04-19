@@ -7,19 +7,15 @@ ngapp.service('idCacheService', function(patcherService) {
     };
 
     this.cacheRecord = function(patchFile) {
-        let idCache = prepareIdCache(patchFile),
-            forms = Object.values(idCache),
-            nextForm = xelib.GetNextObjectID(patchFile);
-
-        let getNewFormId = function() {
-            while (forms.includes(nextForm)) nextForm++;
-            forms.push(nextForm);
-            return nextForm++;
-        };
+        let idCache = prepareIdCache(patchFile);
 
         return function(rec, id) {
-            if (!idCache.hasOwnProperty(id)) idCache[id] = getNewFormId();
-            xelib.SetFormID(rec, idCache[id], true, false);
+            if (!xelib.IsMaster(rec)) return;
+            if (idCache.hasOwnProperty(id)) {
+                xelib.SetFormID(rec, idCache[id], true, false);
+            } else {
+                idCache[id] = xelib.GetFormID(rec, true);
+            }
             if (xelib.HasElement(rec, 'EDID')) xelib.SetValue(rec, 'EDID', id);
             return rec;
         };
