@@ -1,6 +1,7 @@
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
-        let filesToPatch, patcher, patcherSettings, helpers, locals;
+        let filesToPatch, customProgress, patcher, patcherSettings,
+            helpers, locals;
 
         // helper functions
         let progressMessage = (title) => progressService.progressMessage(title);
@@ -8,7 +9,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let addProgress = (num) => progressService.addProgress(num);
 
         let patcherProgress = function(message) {
-            addProgress(1);
+            if (!customProgress) addProgress(1);
             progressMessage(message);
         };
 
@@ -61,7 +62,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             let plugin = getFile(filename),
                 loadOpts = loadFn(plugin.handle, helpers, patcherSettings, locals);
             if (!loadOpts) {
-                addProgress(2);
+                if (!customProgress) addProgress(2);
                 return [];
             }
             let recordsContext = getRecordsContext(loadOpts, filename),
@@ -99,7 +100,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             filesToPatch.forEach(function(filename) {
                 let recordsToPatch = getRecordsToPatch(loadFn, filename);
                 if (recordsToPatch.length === 0) {
-                    addProgress(1);
+                    if (!customProgress) addProgress(1);
                     return;
                 }
                 patchRecords(patchFn, filename, recordsToPatch);
@@ -128,8 +129,10 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let patcherId = patcherInfo.id;
         filesToPatch = patcherInfo.filesToPatch;
         patcher = patcherService.getPatcher(patcherId);
+        customProgress = patcher.execute.customProgress;
         patcherSettings = patcherService.settings[patcherId];
         helpers = getPatcherHelpers();
+        if (customProgress) helpers.addProgress = addProgress;
         locals = {};
 
         initialize(patcher.execute);

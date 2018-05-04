@@ -31,9 +31,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     };
 
     let getActivePatchPlugins = function(patchPlugins) {
-        return patchPlugins.filter(function(patchPlugin) {
-            return !patchPlugin.disabled;
-        });
+        return patchPlugins.filter(patchPlugin => !patchPlugin.disabled);
     };
 
     let progressDone = function(patchPlugins) {
