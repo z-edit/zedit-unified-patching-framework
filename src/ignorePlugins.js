@@ -12,15 +12,16 @@ ngapp.directive('ignorePlugins', function() {
 ngapp.controller('ignorePluginsController', function($scope, patcherService) {
     // helper functions
     let updateIgnoredFiles = function() {
-        patcherSettings.ignoredFiles = $scope.ignoredPlugins
-            .filter((item) => { return !item.invalid; })
-            .map((item) => { return item.filename; });
+        let settings = patcherService.settings[$scope.patcherId];
+        settings.ignoredFiles = $scope.ignoredPlugins
+            .filter((item) => !item.invalid)
+            .map((item) => item.filename);
     };
 
     let getValid = function(item, itemIndex) {
         let filename = item.filename,
             isRequired = $scope.requiredPlugins.includes(filename),
-            duplicate = $scope.ignoredPlugins.find(function(item, index) {
+            duplicate = $scope.ignoredPlugins.find((item, index) => {
                 return item.filename === filename && index < itemIndex;
             });
         return !isRequired && !duplicate;
@@ -51,16 +52,12 @@ ngapp.controller('ignorePluginsController', function($scope, patcherService) {
     };
 
     // initialization
-    if (!$scope.patcherId) {
+    if (!$scope.patcherId)
         throw 'ignorePlugins Directive: patcher-id is required.';
-    }
 
     let patcher = patcherService.getPatcher($scope.patcherId),
-        patcherSettings = patcherService.settings[$scope.patcherId],
-        ignoredFiles = patcherSettings.ignoredFiles;
+        ignored = patcherService.getIgnoredFiles(patcher);
 
-    $scope.requiredPlugins = patcher.requiredFiles || [];
-    $scope.ignoredPlugins = ignoredFiles.map(function (filename) {
-        return {filename: filename};
-    });
+    $scope.requiredPlugins = patcherService.getRequiredFiles(patcher);
+    $scope.ignoredPlugins = ignored.map(filename => ({filename: filename}));
 });

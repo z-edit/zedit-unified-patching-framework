@@ -1,4 +1,8 @@
 ngapp.service('patcherService', function($rootScope, settingsService) {
+    const disabledHintBase =
+        'This patcher is disabled because the following required' +
+        '\r\nfiles are not available to the patch plugin:';
+
     let service = this,
         patchers = [],
         tabs = [{
@@ -8,24 +12,28 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         }];
 
     // private functions
+    let getAvailableFiles = function(patcher) {
+        let patchFileName = service.settings[patcher.info.id].patchFileName;
+        return xelib.GetLoadedFileNames().itemsBefore(patchFileName);
+    };
+
     let getPatcherEnabled = function(patcher) {
         return service.settings[patcher.info.id].enabled;
     };
 
+    let getMissingRequirements = function(patcher) {
+        return service.getRequiredFiles(patcher)
+            .subtract(patcher.availableFiles);
+    };
+
     let getPatcherDisabled = function(patcher) {
-        let requiredFiles = patcher.requiredFiles || [];
-        return requiredFiles.subtract(patcher.filesToPatch).length > 0;
+        return getMissingRequirements(patcher).length > 0;
     };
 
     let getDisabledHint = function(patcher) {
-        let filesToPatch = patcher.filesToPatch,
-            requiredFiles = patcher.requiredFiles || [],
-            hint = 'This patcher is disabled because the following required' +
-                '\r\nfiles are not available to the patch plugin:';
-        requiredFiles.subtract(filesToPatch).forEach(function(filename) {
-            hint += `\r\n - ${filename}`;
-        });
-        return hint;
+        return getMissingRequirements(patcher).reduce((hint, filename) => {
+            return `${hint}\r\n - ${filename}`;
+        }, disabledHintBase);
     };
 
     let getDefaultSettings = function(patcher) {
@@ -67,16 +75,15 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let getPatchPlugin = function(patcher, patchPlugins) {
-        let patcherSettings = service.settings[patcher.info.id],
-            patchFileName = patcherSettings.patchFileName;
-        return patchPlugins.find(function(patchPlugin) {
+        let patchFileName = service.settings[patcher.info.id].patchFileName;
+        return patchPlugins.find(patchPlugin => {
             return patchPlugin.filename === patchFileName;
         }) || createPatchPlugin(patchPlugins, patchFileName);
     };
 
     // public functions
     this.getPatcher = function(id) {
-        return patchers.find((patcher) => { return patcher.info.id === id; });
+        return patchers.find(patcher => patcher.info.id === id);
     };
 
     this.registerPatcher = function(patcher) {
@@ -85,7 +92,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.updateForGameMode = function(gameMode) {
-        patchers = patchers.filter(function(patcher) {
+        patchers = patchers.filter(patcher => {
             return patcher.gameModes.includes(gameMode);
         });
     };
@@ -104,28 +111,34 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.getTabs = function() {
-        return tabs.map(function(tab) {
-            return {
-                label: tab.label,
-                templateUrl: tab.templateUrl,
-                controller: tab.controller
-            };
-        });
+        return tabs.map(tab => ({
+            label: tab.label,
+            templateUrl: tab.templateUrl,
+            controller: tab.controller
+        }));
+    };
+
+    this.getRequiredFiles = function(patcher) {
+        if (!patcher.requiredFiles) return [];
+        if (patcher.requiredFiles.constructor === Function)
+            return patcher.requiredFiles() || [];
+        return patcher.requiredFiles;
+    };
+
+    this.getIgnoredFiles = function(patcher) {
+        return service.settings[patcher.info.id].ignoredFiles;
     };
 
     this.getFilesToPatch = function(patcher) {
-        let patcherSettings = service.settings[patcher.info.id],
-            ignored = patcherSettings.ignoredFiles,
-            filesToPatch = xelib.GetLoadedFileNames(),
-            patchFileName = patcherSettings.patchFileName,
-            patchFileIndex = filesToPatch.indexOf(patchFileName);
-        if (patchFileIndex > -1) filesToPatch.splice(patchFileIndex);
-        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
-        return filesToPatch.subtract(ignored);
+        let filesToPatch = patcher.availableFiles.slice();
+        if (patcher.getFilesToPatch)
+            filesToPatch = patcher.getFilesToPatch(filesToPatch);
+        return filesToPatch.subtract(service.getIgnoredFiles(patcher));
     };
 
     this.updateFilesToPatch = function() {
         patchers.forEach(function(patcher) {
+            patcher.availableFiles = getAvailableFiles(patcher);
             patcher.filesToPatch = service.getFilesToPatch(patcher);
         });
     };

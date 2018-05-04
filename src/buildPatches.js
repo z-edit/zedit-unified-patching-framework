@@ -28,6 +28,7 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
     // scope functions
     $scope.patcherToggled = function(patcher) {
         $scope.settings[patcher.id].enabled = patcher.active;
+        $scope.updatePatchStatuses();
     };
 
     $scope.patchFileNameChanged = function(patchPlugin) {
