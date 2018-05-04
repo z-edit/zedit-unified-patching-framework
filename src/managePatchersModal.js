@@ -14,6 +14,9 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
     selectTab($scope.tabs[0]);
 
     // scope functions
+    $scope.buildAllPatches = () => $scope.$broadcast('buildAllPatches');
+    $scope.addPatchPlugin = () => $scope.$broadcast('addPatchPlugin');
+
     $scope.closeModal = function() {
         patcherService.saveSettings();
         $scope.$emit('closeModal');
