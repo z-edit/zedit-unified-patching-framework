@@ -70,11 +70,12 @@ ngapp.run(function($rootScope, patcherService) {
 // register deferred module loader
 moduleService.deferLoader('UPF');
 ngapp.run(function(patcherService) {
-    moduleService.registerLoader('UPF', function(module, fh) {
+    moduleService.registerLoader('UPF', function({module, fh}) {
         Function.execute({
             registerPatcher: patcherService.registerPatcher,
             fh: fh,
             info: module.info,
+            patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
         }, module.code);
     });
