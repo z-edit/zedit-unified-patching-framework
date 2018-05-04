@@ -46,7 +46,7 @@
 <section>
     <div ng-repeat="patchPlugin in patchPlugins" class="patch-plugin-item">
         <input type="text" ng-model="patchPlugin.filename" ng-change="patchFileNameChanged(patchPlugin)" />
-        <button class="action-btn small" ng-click="buildPatchPlugin(patchPlugin)" ng-disabled="patchPlugin.disabled">Build</button>
+        <button class="action-btn small" ng-click="buildPatchPlugin(patchPlugin)" title="{{patchPlugin.disabledHint}}" ng-disabled="patchPlugin.disabled">{{patchPlugin.disabled ? 'Disabled' : 'Build'}}</button>
         <button class="action-btn small negative" ng-click="removePatchPlugin($index)">Delete</button>
         <list-view items="patchPlugin.patchers" drag-type="patcher">
             <span title="{{$parent.item.disabledHint}}" ng-class="{'negative-fg': $parent.item.disabled}">

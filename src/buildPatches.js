@@ -17,6 +17,14 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
         return patchFileName;
     };
 
+    let getDisabledHint = function(patchPlugin) {
+        if (patchPlugin.filename.length === 0)
+            return 'Patch plugin filename cannot be empty.';
+        let enabledPatchers = patchPlugin.patchers.filter(p => p.active);
+        if (enabledPatchers.length === 0)
+            return 'No patchers to build.';
+    };
+
     // scope functions
     $scope.patcherToggled = function(patcher) {
         $scope.settings[patcher.id].enabled = patcher.active;
@@ -46,10 +54,9 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
     };
 
     $scope.updatePatchStatuses = function() {
-        $scope.patchPlugins.forEach(function(patch) {
-            patch.disabled = patch.patchers.reduce(function(b, patcher) {
-                return b || !patcher.active;
-            }, false) || !patch.patchers.length || !patch.filename.length;
+        $scope.patchPlugins.forEach(patchPlugin => {
+            patchPlugin.disabledHint = getDisabledHint(patchPlugin);
+            patchPlugin.disabled = !!patchPlugin.disabledHint;
         });
     };
 
