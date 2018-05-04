@@ -41,14 +41,15 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             return file[cacheKey];
         };
 
-        let getRecordsContext = function(signature, filename) {
+        let getRecordsContext = function({signature, overrides}, filename) {
             let recordType = xelib.NameFromSignature(signature);
+            if (overrides) recordType = `${recordType} override`;
             return `${recordType} records from ${filename}`;
         };
 
-        let loadRecords = function(filename, signature, recordsContext) {
+        let loadRecords = function(filename, {signature, overrides}, recordsContext) {
             patcherProgress(`Loading ${recordsContext}.`);
-            return getRecords(filename, signature, false);
+            return getRecords(filename, signature, overrides);
         };
 
         let filterRecords = function(records, filterFn, recordsContext) {
@@ -63,9 +64,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 addProgress(2);
                 return [];
             }
-            let signature = loadOpts.signature,
-                recordsContext = getRecordsContext(signature, filename),
-                records = loadRecords(filename, signature, recordsContext);
+            let recordsContext = getRecordsContext(loadOpts, filename),
+                records = loadRecords(filename, loadOpts, recordsContext);
             return filterRecords(records, loadOpts.filter, recordsContext);
         };
 
