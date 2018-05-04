@@ -61,7 +61,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let getRecordsToPatch = function(loadFn, filename) {
             let plugin = getFile(filename),
                 loadOpts = loadFn(plugin.handle, helpers, patcherSettings, locals);
-            if (!loadOpts) {
+            if (!loadOpts || !loadOpts.signature) {
                 if (!customProgress) addProgress(2);
                 return [];
             }
