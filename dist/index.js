@@ -24,9 +24,18 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
         return patchFileName;
     };
 
+    let getDisabledHint = function(patchPlugin) {
+        if (patchPlugin.filename.length === 0)
+            return 'Patch plugin filename cannot be empty.';
+        let enabledPatchers = patchPlugin.patchers.filter(p => p.active);
+        if (enabledPatchers.length === 0)
+            return 'No patchers to build.';
+    };
+
     // scope functions
     $scope.patcherToggled = function(patcher) {
         $scope.settings[patcher.id].enabled = patcher.active;
+        $scope.updatePatchStatuses();
     };
 
     $scope.patchFileNameChanged = function(patchPlugin) {
@@ -53,10 +62,9 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
     };
 
     $scope.updatePatchStatuses = function() {
-        $scope.patchPlugins.forEach(function(patch) {
-            patch.disabled = patch.patchers.reduce(function(b, patcher) {
-                return b || !patcher.active;
-            }, false) || !patch.patchers.length || !patch.filename.length;
+        $scope.patchPlugins.forEach(patchPlugin => {
+            patchPlugin.disabledHint = getDisabledHint(patchPlugin);
+            patchPlugin.disabled = !!patchPlugin.disabledHint;
         });
     };
 
@@ -80,19 +88,15 @@ ngapp.service('idCacheService', function(patcherService) {
     };
 
     this.cacheRecord = function(patchFile) {
-        let idCache = prepareIdCache(patchFile),
-            forms = Object.values(idCache),
-            nextForm = xelib.GetNextObjectID(patchFile);
-
-        let getNewFormId = function() {
-            while (forms.includes(nextForm)) nextForm++;
-            forms.push(nextForm);
-            return nextForm++;
-        };
+        let idCache = prepareIdCache(patchFile);
 
         return function(rec, id) {
-            if (!idCache.hasOwnProperty(id)) idCache[id] = getNewFormId();
-            xelib.SetFormID(rec, idCache[id], true, false);
+            if (!xelib.IsMaster(rec)) return;
+            if (idCache.hasOwnProperty(id)) {
+                xelib.SetFormID(rec, idCache[id], true, false);
+            } else {
+                idCache[id] = xelib.GetFormID(rec, true);
+            }
             if (xelib.HasElement(rec, 'EDID')) xelib.SetValue(rec, 'EDID', id);
             return rec;
         };
@@ -112,15 +116,16 @@ ngapp.directive('ignorePlugins', function() {
 ngapp.controller('ignorePluginsController', function($scope, patcherService) {
     // helper functions
     let updateIgnoredFiles = function() {
-        patcherSettings.ignoredFiles = $scope.ignoredPlugins
-            .filter((item) => { return !item.invalid; })
-            .map((item) => { return item.filename; });
+        let settings = patcherService.settings[$scope.patcherId];
+        settings.ignoredFiles = $scope.ignoredPlugins
+            .filter((item) => !item.invalid)
+            .map((item) => item.filename);
     };
 
     let getValid = function(item, itemIndex) {
         let filename = item.filename,
             isRequired = $scope.requiredPlugins.includes(filename),
-            duplicate = $scope.ignoredPlugins.find(function(item, index) {
+            duplicate = $scope.ignoredPlugins.find((item, index) => {
                 return item.filename === filename && index < itemIndex;
             });
         return !isRequired && !duplicate;
@@ -151,18 +156,14 @@ ngapp.controller('ignorePluginsController', function($scope, patcherService) {
     };
 
     // initialization
-    if (!$scope.patcherId) {
+    if (!$scope.patcherId)
         throw 'ignorePlugins Directive: patcher-id is required.';
-    }
 
     let patcher = patcherService.getPatcher($scope.patcherId),
-        patcherSettings = patcherService.settings[$scope.patcherId],
-        ignoredFiles = patcherSettings.ignoredFiles;
+        ignored = patcherService.getIgnoredFiles(patcher);
 
-    $scope.requiredPlugins = patcher.requiredFiles || [];
-    $scope.ignoredPlugins = ignoredFiles.map(function (filename) {
-        return {filename: filename};
-    });
+    $scope.requiredPlugins = patcherService.getRequiredFiles(patcher);
+    $scope.ignoredPlugins = ignored.map(filename => ({filename: filename}));
 });
 ngapp.controller('managePatchersModalController', function($scope, patcherService) {
     // helper functions
@@ -180,6 +181,9 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
     selectTab($scope.tabs[0]);
 
     // scope functions
+    $scope.buildAllPatches = () => $scope.$broadcast('buildAllPatches');
+    $scope.addPatchPlugin = () => $scope.$broadcast('addPatchPlugin');
+
     $scope.closeModal = function() {
         patcherService.saveSettings();
         $scope.$emit('closeModal');
@@ -224,9 +228,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     };
 
     let getActivePatchPlugins = function(patchPlugins) {
-        return patchPlugins.filter(function(patchPlugin) {
-            return !patchPlugin.disabled;
-        });
+        return patchPlugins.filter(patchPlugin => !patchPlugin.disabled);
     };
 
     let progressDone = function(patchPlugins) {
@@ -253,6 +255,10 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     };
 });
 ngapp.service('patcherService', function($rootScope, settingsService) {
+    const disabledHintBase =
+        'This patcher is disabled because the following required' +
+        '\r\nfiles are not available to the patch plugin:';
+
     let service = this,
         patchers = [],
         tabs = [{
@@ -262,24 +268,28 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         }];
 
     // private functions
+    let getAvailableFiles = function(patcher) {
+        let patchFileName = service.settings[patcher.info.id].patchFileName;
+        return xelib.GetLoadedFileNames().itemsBefore(patchFileName);
+    };
+
     let getPatcherEnabled = function(patcher) {
         return service.settings[patcher.info.id].enabled;
     };
 
+    let getMissingRequirements = function(patcher) {
+        return service.getRequiredFiles(patcher)
+            .subtract(patcher.availableFiles);
+    };
+
     let getPatcherDisabled = function(patcher) {
-        let requiredFiles = patcher.requiredFiles || [];
-        return requiredFiles.subtract(patcher.filesToPatch).length > 0;
+        return getMissingRequirements(patcher).length > 0;
     };
 
     let getDisabledHint = function(patcher) {
-        let filesToPatch = patcher.filesToPatch,
-            requiredFiles = patcher.requiredFiles || [],
-            hint = 'This patcher is disabled because the following required' +
-                '\r\nfiles are not available to the patch plugin:';
-        requiredFiles.subtract(filesToPatch).forEach(function(filename) {
-            hint += `\r\n - ${filename}`;
-        });
-        return hint;
+        return getMissingRequirements(patcher).reduce((hint, filename) => {
+            return `${hint}\r\n - ${filename}`;
+        }, disabledHintBase);
     };
 
     let getDefaultSettings = function(patcher) {
@@ -321,16 +331,15 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     let getPatchPlugin = function(patcher, patchPlugins) {
-        let patcherSettings = service.settings[patcher.info.id],
-            patchFileName = patcherSettings.patchFileName;
-        return patchPlugins.find(function(patchPlugin) {
+        let patchFileName = service.settings[patcher.info.id].patchFileName;
+        return patchPlugins.find(patchPlugin => {
             return patchPlugin.filename === patchFileName;
         }) || createPatchPlugin(patchPlugins, patchFileName);
     };
 
     // public functions
     this.getPatcher = function(id) {
-        return patchers.find((patcher) => { return patcher.info.id === id; });
+        return patchers.find(patcher => patcher.info.id === id);
     };
 
     this.registerPatcher = function(patcher) {
@@ -339,7 +348,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.updateForGameMode = function(gameMode) {
-        patchers = patchers.filter(function(patcher) {
+        patchers = patchers.filter(patcher => {
             return patcher.gameModes.includes(gameMode);
         });
     };
@@ -358,28 +367,34 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.getTabs = function() {
-        return tabs.map(function(tab) {
-            return {
-                label: tab.label,
-                templateUrl: tab.templateUrl,
-                controller: tab.controller
-            };
-        });
+        return tabs.map(tab => ({
+            label: tab.label,
+            templateUrl: tab.templateUrl,
+            controller: tab.controller
+        }));
+    };
+
+    this.getRequiredFiles = function(patcher) {
+        if (!patcher.requiredFiles) return [];
+        if (patcher.requiredFiles.constructor === Function)
+            return patcher.requiredFiles() || [];
+        return patcher.requiredFiles;
+    };
+
+    this.getIgnoredFiles = function(patcher) {
+        return service.settings[patcher.info.id].ignoredFiles;
     };
 
     this.getFilesToPatch = function(patcher) {
-        let patcherSettings = service.settings[patcher.info.id],
-            ignored = patcherSettings.ignoredFiles,
-            filesToPatch = xelib.GetLoadedFileNames(),
-            patchFileName = patcherSettings.patchFileName,
-            patchFileIndex = filesToPatch.indexOf(patchFileName);
-        if (patchFileIndex > -1) filesToPatch.splice(patchFileIndex);
-        if (patcher.getFilesToPatch) patcher.getFilesToPatch(filesToPatch);
-        return filesToPatch.subtract(ignored);
+        let filesToPatch = patcher.availableFiles.slice();
+        if (patcher.getFilesToPatch)
+            filesToPatch = patcher.getFilesToPatch(filesToPatch);
+        return filesToPatch.subtract(service.getIgnoredFiles(patcher));
     };
 
     this.updateFilesToPatch = function() {
         patchers.forEach(function(patcher) {
+            patcher.availableFiles = getAvailableFiles(patcher);
             patcher.filesToPatch = service.getFilesToPatch(patcher);
         });
     };
@@ -404,7 +419,8 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 });
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
-        let filesToPatch, patcher, patcherSettings, helpers, locals;
+        let filesToPatch, customProgress, patcher, patcherSettings,
+            helpers, locals;
 
         // helper functions
         let progressMessage = (title) => progressService.progressMessage(title);
@@ -412,7 +428,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let addProgress = (num) => progressService.addProgress(num);
 
         let patcherProgress = function(message) {
-            addProgress(1);
+            if (!customProgress) addProgress(1);
             progressMessage(message);
         };
 
@@ -445,14 +461,15 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             return file[cacheKey];
         };
 
-        let getRecordsContext = function(signature, filename) {
+        let getRecordsContext = function({signature, overrides}, filename) {
             let recordType = xelib.NameFromSignature(signature);
+            if (overrides) recordType = `${recordType} override`;
             return `${recordType} records from ${filename}`;
         };
 
-        let loadRecords = function(filename, signature, recordsContext) {
+        let loadRecords = function(filename, {signature, overrides}, recordsContext) {
             patcherProgress(`Loading ${recordsContext}.`);
-            return getRecords(filename, signature, false);
+            return getRecords(filename, signature, overrides);
         };
 
         let filterRecords = function(records, filterFn, recordsContext) {
@@ -464,12 +481,11 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             let plugin = getFile(filename),
                 loadOpts = loadFn(plugin.handle, helpers, patcherSettings, locals);
             if (!loadOpts) {
-                addProgress(2);
+                if (!customProgress) addProgress(2);
                 return [];
             }
-            let signature = loadOpts.signature,
-                recordsContext = getRecordsContext(signature, filename),
-                records = loadRecords(filename, signature, recordsContext);
+            let recordsContext = getRecordsContext(loadOpts, filename),
+                records = loadRecords(filename, loadOpts, recordsContext);
             return filterRecords(records, loadOpts.filter, recordsContext);
         };
 
@@ -503,7 +519,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             filesToPatch.forEach(function(filename) {
                 let recordsToPatch = getRecordsToPatch(loadFn, filename);
                 if (recordsToPatch.length === 0) {
-                    addProgress(1);
+                    if (!customProgress) addProgress(1);
                     return;
                 }
                 patchRecords(patchFn, filename, recordsToPatch);
@@ -532,8 +548,10 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let patcherId = patcherInfo.id;
         filesToPatch = patcherInfo.filesToPatch;
         patcher = patcherService.getPatcher(patcherId);
+        customProgress = patcher.execute.customProgress;
         patcherSettings = patcherService.settings[patcherId];
         helpers = getPatcherHelpers();
+        if (customProgress) helpers.addProgress = addProgress;
         locals = {};
 
         initialize(patcher.execute);
