@@ -44,5 +44,14 @@
       "type": "handle"
     },
     "description": "Uses record consistency caching to make certain the input record `rec` stays at the same Form ID when the patch gets regenerated.  This function should be used on all records created by UPF patchers, excluding overrides.  The `id` should be a unique string value for the record.  It is recommended to use a unique prefix for `id` to avoid collisions with other patchers.  The record's editor ID will be set to `id` if the record has an Editor ID field."
+  },
+  {
+    "name": "addProgress",
+    "type": "function",
+    "args": [{
+      "name": "amount",
+      "type": "number"
+    }],
+    "description": "Only available when `customProgress` is set in your patcher's execute block.  Adds `amount` to the progress bar."
   }
 ]

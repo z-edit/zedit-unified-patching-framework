@@ -22,6 +22,11 @@
   {
     "name": "patcherPath",
     "type": "string",
+    "description": "Absolute path for the folder where your patcher module is installed on the user's machine.  Should be prepended to paths when loading/saving files."
+  },
+  {
+    "name": "patcherUrl",
+    "type": "string",
     "description": "`file://` URL for the folder where your patcher module is installed on the user's machine.  Should be prepended to any HTML template/resource URLs."
   },
   {
