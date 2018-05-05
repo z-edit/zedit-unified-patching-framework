@@ -44,6 +44,16 @@
     "description": "Array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
   },
   {
+    "name": "requiredFiles",
+    "type": "function",
+    "args": [],
+    "returns": {
+      "type": "array of string"
+    },
+    "optional": true,
+    "description": "You can use a function for `requiredFiles` if you need to require different plugin files conditionally."
+  },
+  {
     "name": "getFilesToPatch",
     "type": "function",
     "optional": true,
@@ -61,6 +71,20 @@
     "name": "execute",
     "type": "object",
     "items": [
+      {
+        "name": "customProgress",
+        "type": "function",
+        "optional": true,
+        "args": [{
+          "name": "filesToPatch",
+          "type": "array of string",
+          "description": "The filenames of the files the patcher will be run on."
+        }],
+        "returns": {
+          "type": "number"
+        },
+        "description": "Provide a function here to manage the progress bar manually.  The function should return the max progress for the patcher."
+      },
       {
         "name": "initialize",
         "type": "function",
@@ -92,7 +116,40 @@
         "items": [
           {
             "name": "load",
+            "type": "object",
+            "description": "Loaded records which pass `filter` will be copied to the patch plugin, and then passed to the `patch` function.",
+            "itemsLabel": "Load Options Object",
+            "items": [
+              {
+                "name": "signature",
+                "type": "string",
+                "description": "Record signature to load.  You can view record signatures by top level group names on the tree view and in record headers."
+              },
+              {
+                "name": "overrides",
+                "type": "boolean",
+                "optional": true,
+                "description": "Pass true to include override records.  Override records are not included by default."
+              },
+              {
+                "name": "filter",
+                "type": "function",
+                "optional": true,
+                "args": [{
+                  "name": "record",
+                  "type": "handle"
+                }],
+                "returns": {
+                  "type": "boolean"
+                },
+                "description": "Filter function.  Called for each loaded record.  Return false to skip patching a record."
+              }
+            ]
+          },
+          {
+            "name": "load",
             "type": "function",
+            "optional": true,
             "args": [{
               "name": "plugin",
               "type": "handle",
@@ -113,32 +170,12 @@
             "returns": {
               "type": "object"
             },
-            "description": "Called for each plugin to patch.  Return null or undefined to skip loading records from the plugin, else return a load options object.  Loaded records which pass `filter` will be copied to the patch plugin, and then passed to the `patch` function below.",
-            "itemsLabel": "Load Options Object",
-            "items": [
-              {
-                "name": "signature",
-                "type": "string",
-                "description": "Record signatures to load separated by commas."
-              },
-              {
-                "name": "filter",
-                "type": "function",
-                "optional": true,
-                "args": [{
-                  "name": "record",
-                  "type": "handle"
-                }],
-                "returns": {
-                  "type": "boolean"
-                },
-                "description": "Filter function.  Called for each loaded record.  Return false to skip patching a record."
-              }
-            ]
+            "description": "You can use a function for `load` if you need to skip certain plugins conditionally, but it is not recommended.  Return null or undefined to skip loading records from a plugin, else return a load options object."
           },
           {
             "name": "patch",
             "type": "function",
+            "optional": true,
             "args": [{
               "name": "record",
               "type": "handle",
