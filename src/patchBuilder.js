@@ -7,8 +7,10 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         return patchPlugin.patchers.filterOnKey('active').mapOnKey('id')
             .map(patcherService.getPatcher)
             .reduce(function(sum, patcher) {
-                let numProcessTasks = 3 * patcher.execute.process.length;
-                return sum + 2 + numProcessTasks * patcher.filesToPatch.length;
+                let exec = patcher.execute,
+                    files = patcher.filesToPatch;
+                if (exec.customProgress) return exec.customProgress(files);
+                return sum + 2 + 3 * exec.process.length * files.length;
             }, 1);
     };
 
