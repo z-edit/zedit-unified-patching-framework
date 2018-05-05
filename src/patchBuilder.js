@@ -50,6 +50,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         openProgressModal(maxProgress);
         $timeout(function() {
             errorService.try(() => activePatchPlugins.forEach(build));
+            patcherService.saveSettings();
             progressDone(activePatchPlugins);
             cache = {};
             xelib.FreeHandleGroup();
