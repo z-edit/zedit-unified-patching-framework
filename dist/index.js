@@ -1,10 +1,13 @@
-/* global ngapp, xelib, modulePath, moduleService */
+/* global ngapp, xelib, moduleUrl, moduleService */
+
 // helper variables and functions
 const openManagePatchersModal = function(scope) {
     scope.$emit('openModal', 'managePatchers', {
-        basePath: `${modulePath}/partials`
+        basePath: `${moduleUrl}/partials`
     });
 };
+
+// == begin source files ==
 ngapp.controller('buildPatchesController', function($scope, $q, patcherService, patchBuilder) {
     // helper functions
     let getUsedFileNames = function() {
@@ -108,7 +111,7 @@ ngapp.directive('ignorePlugins', function() {
         scope: {
             patcherId: '@'
         },
-        templateUrl: `${modulePath}/partials/ignorePlugins.html`,
+        templateUrl: `${moduleUrl}/partials/ignorePlugins.html`,
         controller: 'ignorePluginsController'
     }
 });
@@ -263,7 +266,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         patchers = [],
         tabs = [{
             label: 'Build Patches',
-            templateUrl: `${modulePath}/partials/buildPatches.html`,
+            templateUrl: `${moduleUrl}/partials/buildPatches.html`,
             controller: 'buildPatchesController'
         }];
 
@@ -480,7 +483,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let getRecordsToPatch = function(loadFn, filename) {
             let plugin = getFile(filename),
                 loadOpts = loadFn(plugin.handle, helpers, patcherSettings, locals);
-            if (!loadOpts) {
+            if (!loadOpts || !loadOpts.signature) {
                 if (!customProgress) addProgress(2);
                 return [];
             }
@@ -637,37 +640,37 @@ let topics = [{
     path: 'Modules/Core Modules',
     topic: {
         label: 'Unified Patching Framework',
-        templateUrl: `${modulePath}/docs/overview.html`,
+        templateUrl: `${moduleUrl}/docs/overview.html`,
         controller: 'upfOverviewController'
     }
 }, {
     path: 'Modules',
     topic: {
         label: 'Patcher Modules',
-        templateUrl: `${modulePath}/docs/patcherModules.html`,
+        templateUrl: `${moduleUrl}/docs/patcherModules.html`,
         controller: 'patcherModulesController'
     }
 }, {
     path: 'Modal Views',
     topic: {
         label: 'Manage Patchers Modal',
-        templateUrl: `${modulePath}/docs/managePatchersModal.html`,
+        templateUrl: `${moduleUrl}/docs/managePatchersModal.html`,
         children: [{
             label: 'Build Patches Tab',
-            templateUrl: `${modulePath}/docs/buildPatches.html`
+            templateUrl: `${moduleUrl}/docs/buildPatches.html`
         }]
     }
 }, {
     path: 'Modal Views/Settings Modal',
     topic: {
         label: 'UPF Settings Tab',
-        templateUrl: `${modulePath}/docs/upfSettings.html`
+        templateUrl: `${moduleUrl}/docs/upfSettings.html`
     }
 }, {
     path: 'Development/APIs',
     topic: {
         label: 'UPF Patcher API',
-        templateUrl: `${modulePath}/docs/api.html`,
+        templateUrl: `${moduleUrl}/docs/api.html`,
         controller: 'upfPatcherApiController'
     }
 }];
@@ -677,7 +680,7 @@ ngapp.run(function(helpService) {
 });
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.bannerStyle = {
-        'background': `url('${modulePath}/images/banner.jpg')`,
+        'background': `url('${moduleUrl}/images/banner.jpg')`,
         'background-size': 'cover'
     };
 
@@ -686,6 +689,8 @@ ngapp.controller('upfSettingsController', function($timeout, $scope) {
         $timeout(() => openManagePatchersModal($scope));
     };
 });
+// == end source files ==
+
 // add manage patchers context menu item to tree view context menu
 ngapp.run(function(contextMenuFactory) {
     let menuItems = contextMenuFactory.treeViewItems,
@@ -708,7 +713,7 @@ ngapp.run(function(settingsService) {
     settingsService.registerSettings({
         appModes: ['edit'],
         label: 'Unified Patching Framework',
-        templateUrl: `${modulePath}/partials/settings.html`,
+        templateUrl: `${moduleUrl}/partials/settings.html`,
         controller: 'upfSettingsController'
     });
 });
@@ -750,11 +755,12 @@ ngapp.run(function($rootScope, patcherService) {
 // register deferred module loader
 moduleService.deferLoader('UPF');
 ngapp.run(function(patcherService) {
-    moduleService.registerLoader('UPF', function(module, fh) {
+    moduleService.registerLoader('UPF', function({module, fh}) {
         Function.execute({
             registerPatcher: patcherService.registerPatcher,
             fh: fh,
             info: module.info,
+            patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
         }, module.code);
     });

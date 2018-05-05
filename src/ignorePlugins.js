@@ -4,7 +4,7 @@ ngapp.directive('ignorePlugins', function() {
         scope: {
             patcherId: '@'
         },
-        templateUrl: `${modulePath}/partials/ignorePlugins.html`,
+        templateUrl: `${moduleUrl}/partials/ignorePlugins.html`,
         controller: 'ignorePluginsController'
     }
 });

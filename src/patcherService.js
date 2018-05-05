@@ -7,7 +7,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         patchers = [],
         tabs = [{
             label: 'Build Patches',
-            templateUrl: `${modulePath}/partials/buildPatches.html`,
+            templateUrl: `${moduleUrl}/partials/buildPatches.html`,
             controller: 'buildPatchesController'
         }];
 

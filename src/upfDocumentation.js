@@ -30,37 +30,37 @@ let topics = [{
     path: 'Modules/Core Modules',
     topic: {
         label: 'Unified Patching Framework',
-        templateUrl: `${modulePath}/docs/overview.html`,
+        templateUrl: `${moduleUrl}/docs/overview.html`,
         controller: 'upfOverviewController'
     }
 }, {
     path: 'Modules',
     topic: {
         label: 'Patcher Modules',
-        templateUrl: `${modulePath}/docs/patcherModules.html`,
+        templateUrl: `${moduleUrl}/docs/patcherModules.html`,
         controller: 'patcherModulesController'
     }
 }, {
     path: 'Modal Views',
     topic: {
         label: 'Manage Patchers Modal',
-        templateUrl: `${modulePath}/docs/managePatchersModal.html`,
+        templateUrl: `${moduleUrl}/docs/managePatchersModal.html`,
         children: [{
             label: 'Build Patches Tab',
-            templateUrl: `${modulePath}/docs/buildPatches.html`
+            templateUrl: `${moduleUrl}/docs/buildPatches.html`
         }]
     }
 }, {
     path: 'Modal Views/Settings Modal',
     topic: {
         label: 'UPF Settings Tab',
-        templateUrl: `${modulePath}/docs/upfSettings.html`
+        templateUrl: `${moduleUrl}/docs/upfSettings.html`
     }
 }, {
     path: 'Development/APIs',
     topic: {
         label: 'UPF Patcher API',
-        templateUrl: `${modulePath}/docs/api.html`,
+        templateUrl: `${moduleUrl}/docs/api.html`,
         controller: 'upfPatcherApiController'
     }
 }];

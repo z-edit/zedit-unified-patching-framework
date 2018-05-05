@@ -1,11 +1,16 @@
-/* global ngapp, xelib, modulePath, moduleService */
+/* global ngapp, xelib, moduleUrl, moduleService */
+
 // helper variables and functions
 const openManagePatchersModal = function(scope) {
     scope.$emit('openModal', 'managePatchers', {
-        basePath: `${modulePath}/partials`
+        basePath: `${moduleUrl}/partials`
     });
 };
+
+// == begin source files ==
 //=require src/*.js
+// == end source files ==
+
 // add manage patchers context menu item to tree view context menu
 ngapp.run(function(contextMenuFactory) {
     let menuItems = contextMenuFactory.treeViewItems,
@@ -28,7 +33,7 @@ ngapp.run(function(settingsService) {
     settingsService.registerSettings({
         appModes: ['edit'],
         label: 'Unified Patching Framework',
-        templateUrl: `${modulePath}/partials/settings.html`,
+        templateUrl: `${moduleUrl}/partials/settings.html`,
         controller: 'upfSettingsController'
     });
 });
