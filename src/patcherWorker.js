@@ -58,9 +58,13 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             return filterFn ? records.filter(filterFn) : records;
         };
 
-        let getRecordsToPatch = function(loadFn, filename) {
-            let plugin = getFile(filename),
-                loadOpts = loadFn(plugin.handle, helpers, patcherSettings, locals);
+        let getLoadOpts = function(load, plugin) {
+            return load.constructor === Function ?
+                load(plugin, helpers, settings, locals) : load;
+        };
+
+        let getRecordsToPatch = function(load, filename) {
+            let loadOpts = getLoadOpts(load, getFile(filename));
             if (!loadOpts || !loadOpts.signature) {
                 if (!customProgress) addProgress(2);
                 return [];
@@ -70,9 +74,9 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             return filterRecords(records, loadOpts.filter, recordsContext);
         };
 
-        let patchRecords = function(patchFn, filename, recordsToPatch) {
-            let signature = xelib.Signature(recordsToPatch[0]),
-                recordsContext = getRecordsContext(signature, filename);
+        let patchRecords = function(load, patch, filename, recordsToPatch) {
+            let loadOpts = getLoadOpts(load, getFile(filename)),
+                recordsContext = getRecordsContext(loadOpts, filename);
             patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
             recordsToPatch.forEach(function(record) {
                 let patchRecord = xelib.CopyElement(record, patchFile, false);
@@ -81,29 +85,26 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         };
 
         let getPatcherHelpers = function() {
-            let loadRecords = function(search, includeOverrides = false) {
-                return filesToPatch.reduce(function(records, fn) {
-                    return records.concat(getRecords(fn, search, includeOverrides));
-                }, []);
-            };
             return {
-                loadRecords: loadRecords,
+                loadRecords: function(search, includeOverrides = false) {
+                    return filesToPatch.reduce(function(records, fn) {
+                        let a = getRecords(fn, search, includeOverrides);
+                        return records.concat(a);
+                    }, []);
+                },
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
                 cacheRecord: idCacheService.cacheRecord(patchFile)
             };
         };
 
-        let executeBlock = function(processBlock) {
-            let loadFn = processBlock.load,
-                patchFn = processBlock.patch;
-            filesToPatch.forEach(function(filename) {
-                let recordsToPatch = getRecordsToPatch(loadFn, filename);
-                if (recordsToPatch.length === 0) {
-                    if (!customProgress) addProgress(1);
-                    return;
-                }
-                patchRecords(patchFn, filename, recordsToPatch);
+        let executeBlock = function({load, patch}) {
+            if (!load) return;
+            filesToPatch.forEach(filename => {
+                let recordsToPatch = getRecordsToPatch(load, filename);
+                if (patch && recordsToPatch.length > 0)
+                    return patchRecords(load, patch, filename, recordsToPatch);
+                if (!customProgress) addProgress(1);
             });
         };
 
