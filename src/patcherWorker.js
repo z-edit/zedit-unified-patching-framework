@@ -60,7 +60,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let getLoadOpts = function(load, plugin) {
             return load.constructor === Function ?
-                load(plugin, helpers, settings, locals) : load;
+                load(plugin, helpers, patcherSettings, locals) : load;
         };
 
         let getRecordsToPatch = function(load, filename) {
@@ -80,7 +80,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
             recordsToPatch.forEach(function(record) {
                 let patchRecord = xelib.CopyElement(record, patchFile, false);
-                patchFn(patchRecord, helpers, patcherSettings, locals);
+                patch(patchRecord, helpers, patcherSettings, locals);
             });
         };
 
