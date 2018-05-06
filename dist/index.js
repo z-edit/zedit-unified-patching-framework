@@ -97,7 +97,7 @@ ngapp.service('idCacheService', function(patcherService) {
         return function(rec, id) {
             if (!xelib.IsMaster(rec)) return;
             if (usedIds.hasOwnProperty(id))
-                throw new Exception(`cacheRecord: ${id} is not unique.`);
+                throw new Error(`cacheRecord: ${id} is not unique.`);
             if (idCache.hasOwnProperty(id)) {
                 xelib.SetFormID(rec, idCache[id], true, false);
             } else {
@@ -240,10 +240,11 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         return patchPlugins.filter(patchPlugin => !patchPlugin.disabled);
     };
 
-    let progressDone = function(patchPlugins) {
-        let n = patchPlugins.length;
-        progressService.progressTitle(`${n} patch plugins built successfully`);
-        progressService.progressMessage('All Done!');
+    let progressDone = function(patchPlugins, success) {
+        let builtStr = `${patchPlugins.length} patch plugins built`,
+            successStr = `${success ? 'un' : ''}successfully`;
+        progressService.progressTitle(`${builtStr} ${successStr}`);
+        progressService.progressMessage(success ? 'All Done!' : 'Error');
         progressService.allowClose();
     };
 
@@ -255,9 +256,11 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         xelib.CreateHandleGroup();
         openProgressModal(maxProgress);
         $timeout(function() {
-            errorService.try(() => activePatchPlugins.forEach(build));
+            let success = errorService.try(() => {
+                activePatchPlugins.forEach(build);
+            });
             patcherService.saveSettings();
-            progressDone(activePatchPlugins);
+            progressDone(activePatchPlugins, success);
             cache = {};
             xelib.FreeHandleGroup();
             $rootScope.$broadcast('reloadGUI');
@@ -427,7 +430,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return patchPlugins;
     };
 });
-ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService) {
+ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, customProgress, patcher, patcherSettings,
             helpers, locals;
@@ -514,7 +517,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         };
 
         let getPatcherHelpers = function() {
-            return {
+            return Object.assign({
                 loadRecords: function(search, includeOverrides = false) {
                     return filesToPatch.reduce(function(records, fn) {
                         let a = getRecords(fn, search, includeOverrides);
@@ -524,7 +527,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
                 cacheRecord: idCacheService.cacheRecord(patchFile)
-            };
+            }, interApiService.getApi('UPF'));
         };
 
         let executeBlock = function({load, patch}) {
