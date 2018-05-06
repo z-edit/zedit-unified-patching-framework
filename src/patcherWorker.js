@@ -1,4 +1,4 @@
-ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService) {
+ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, customProgress, patcher, patcherSettings,
             helpers, locals;
@@ -85,7 +85,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         };
 
         let getPatcherHelpers = function() {
-            return {
+            return Object.assign({
                 loadRecords: function(search, includeOverrides = false) {
                     return filesToPatch.reduce(function(records, fn) {
                         let a = getRecords(fn, search, includeOverrides);
@@ -95,7 +95,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
                 cacheRecord: idCacheService.cacheRecord(patchFile)
-            };
+            }, interApiService.getApi('UPF'));
         };
 
         let executeBlock = function({load, patch}) {
