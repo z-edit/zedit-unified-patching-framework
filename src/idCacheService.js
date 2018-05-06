@@ -13,7 +13,7 @@ ngapp.service('idCacheService', function(patcherService) {
         return function(rec, id) {
             if (!xelib.IsMaster(rec)) return;
             if (usedIds.hasOwnProperty(id))
-                throw new Exception(`cacheRecord: ${id} is not unique.`);
+                throw new Error(`cacheRecord: ${id} is not unique.`);
             if (idCache.hasOwnProperty(id)) {
                 xelib.SetFormID(rec, idCache[id], true, false);
             } else {
