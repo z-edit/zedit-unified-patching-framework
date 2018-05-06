@@ -36,10 +36,12 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         return patchPlugins.filter(patchPlugin => !patchPlugin.disabled);
     };
 
-    let progressDone = function(patchPlugins) {
-        let n = patchPlugins.length;
-        progressService.progressTitle(`${n} patch plugins built successfully`);
-        progressService.progressMessage('All Done!');
+    let progressDone = function(patchPlugins, success) {
+        let pluginsStr = `${patchPlugins.length} patch plugins`;
+        progressService.progressTitle(success ?
+            `${pluginsStr} built successfully` :
+            `${pluginsStr} failed to build`);
+        progressService.progressMessage(success ? 'All Done!' : 'Error');
         progressService.allowClose();
     };
 
@@ -51,9 +53,11 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         xelib.CreateHandleGroup();
         openProgressModal(maxProgress);
         $timeout(function() {
-            errorService.try(() => activePatchPlugins.forEach(build));
+            let success = errorService.try(() => {
+                activePatchPlugins.forEach(build);
+            });
             patcherService.saveSettings();
-            progressDone(activePatchPlugins);
+            progressDone(activePatchPlugins, success);
             cache = {};
             xelib.FreeHandleGroup();
             $rootScope.$broadcast('reloadGUI');
