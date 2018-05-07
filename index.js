@@ -82,6 +82,6 @@ ngapp.run(function(patcherService) {
             info: module.info,
             patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
-        }, module.code);
+        }, module.code, module.info.id);
     });
 });
