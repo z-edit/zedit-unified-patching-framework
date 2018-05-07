@@ -6,9 +6,17 @@ ngapp.service('idCacheService', function(patcherService) {
         return cache[fileName];
     };
 
+    let updateNextFormId = function(patchFile, idCache) {
+        let formIds = Object.values(idCache),
+            maxFormId = formIds.reduce((a, b) => Math.max(a, b), 0x7FF);
+        xelib.SetNextObjectID(patchFile, maxFormId + 1);
+    };
+
     this.cacheRecord = function(patchFile) {
         let idCache = prepareIdCache(patchFile),
             usedIds = {};
+
+        updateNextFormId(patchFile, idCache);
 
         return function(rec, id) {
             if (!xelib.IsMaster(rec)) return;
