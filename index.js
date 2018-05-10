@@ -90,9 +90,17 @@ ngapp.service('idCacheService', function(patcherService) {
         return cache[fileName];
     };
 
+    let updateNextFormId = function(patchFile, idCache) {
+        let formIds = Object.values(idCache),
+            maxFormId = formIds.reduce((a, b) => Math.max(a, b), 0x7FF);
+        xelib.SetNextObjectID(patchFile, maxFormId + 1);
+    };
+
     this.cacheRecord = function(patchFile) {
         let idCache = prepareIdCache(patchFile),
             usedIds = {};
+
+        updateNextFormId(patchFile, idCache);
 
         return function(rec, id) {
             if (!xelib.IsMaster(rec)) return;
@@ -241,9 +249,10 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     };
 
     let progressDone = function(patchPlugins, success) {
-        let builtStr = `${patchPlugins.length} patch plugins built`,
-            successStr = `${success ? 'un' : ''}successfully`;
-        progressService.progressTitle(`${builtStr} ${successStr}`);
+        let pluginsStr = `${patchPlugins.length} patch plugins`;
+        progressService.progressTitle(success ?
+            `${pluginsStr} built successfully` :
+            `${pluginsStr} failed to build`);
         progressService.progressMessage(success ? 'All Done!' : 'Error');
         progressService.allowClose();
     };
@@ -773,6 +782,6 @@ ngapp.run(function(patcherService) {
             info: module.info,
             patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
-        }, module.code);
+        }, module.code, module.info.id);
     });
 });
