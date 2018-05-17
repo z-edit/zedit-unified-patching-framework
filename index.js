@@ -11,13 +11,16 @@ const openManagePatchersModal = function(scope) {
 //=require src/*.js
 // == end source files ==
 
-// add manage patchers context menu item to tree view context menu
-ngapp.run(function(contextMenuFactory) {
+moduleService.deferLoader('UPF');
+ngapp.run(function($rootScope, patcherService, contextMenuFactory, settingsService, hotkeyFactory, buttonFactory) {
+    // add manage patchers context menu item to tree view context menu
     let menuItems = contextMenuFactory.treeViewItems,
-        automateIndex = menuItems.findIndex((item) => { return item.id === 'Automate'; });
+        automateIndex = menuItems.findIndex(item => {
+            return item.id === 'Automate';
+        });
     menuItems.splice(automateIndex + 1, 0, {
         id: 'Manage Patchers',
-        visible: () => { return true; },
+        visible: () => true,
         build: (scope, items) => {
             items.push({
                 label: 'Manage Patchers',
@@ -26,41 +29,33 @@ ngapp.run(function(contextMenuFactory) {
             });
         }
     });
-});
 
-// register settings tab
-ngapp.run(function(settingsService) {
+    // register settings tab
     settingsService.registerSettings({
         appModes: ['edit'],
         label: 'Unified Patching Framework',
         templateUrl: `${moduleUrl}/partials/settings.html`,
         controller: 'upfSettingsController'
     });
-});
 
-// register hotkey
-ngapp.run(function(hotkeyFactory) {
+    // register hotkey
     hotkeyFactory.addHotkeys('editView', {
         p: [{
             modifiers: ['ctrlKey', 'shiftKey'],
             callback: openManagePatchersModal
         }]
     });
-});
 
-// register button
-let managePatchersButton = {
-    class: 'fa fa-puzzle-piece',
-    title: 'Manage Patchers',
-    hidden: true,
-    onClick: (scope) => openManagePatchersModal(scope)
-};
-ngapp.run(function(buttonFactory) {
+    // register button
+    let managePatchersButton = {
+        class: 'fa fa-puzzle-piece',
+        title: 'Manage Patchers',
+        hidden: true,
+        onClick: openManagePatchersModal
+    };
     buttonFactory.buttons.unshift(managePatchersButton);
-});
 
-// register for events
-ngapp.run(function($rootScope, patcherService) {
+    // register for events
     $rootScope.$on('sessionStarted', function(e, selectedProfile) {
         patcherService.updateForGameMode(selectedProfile.gameMode);
     });
@@ -70,12 +65,9 @@ ngapp.run(function($rootScope, patcherService) {
         patcherService.loadSettings();
         $rootScope.$applyAsync(() => managePatchersButton.hidden = false);
     });
-});
 
-// register deferred module loader
-moduleService.deferLoader('UPF');
-ngapp.run(function(patcherService) {
-    moduleService.registerLoader('UPF', function({module, fh}) {
+    // register deferred module loader
+    let upfLoader = function({module, fh, moduleService}) {
         Function.execute({
             registerPatcher: patcherService.registerPatcher,
             fh: fh,
@@ -83,5 +75,8 @@ ngapp.run(function(patcherService) {
             patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
         }, module.code, module.info.id);
-    });
+        moduleService.loadDocs(module.path);
+    };
+
+    moduleService.registerLoader('UPF', upfLoader);
 });
