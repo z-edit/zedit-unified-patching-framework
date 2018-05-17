@@ -4,17 +4,17 @@
 <h2>Patcher Schema</h2>
 <p>Patchers can be implemented using JavaScript classes or objects.  You can choose which to use at your own discretion.  Regardless of your choice, your patcher must conform to the following schema:</p>
 
-<api-items items="patcherSchema"></api-items>
+<api-items module="unifiedPatchingFramework" path="patcherSchema.json"></api-items>
 
 <h2>Patcher Helpers</h2>
 <p>Helpers which you can use at any point in your patcher's execution.</p>
 
-<api-items api="helpers" items="patcherHelpers"></api-items>
+<api-items api="helpers" module="unifiedPatchingFramework" path="patcherHelpers.json"></api-items>
 
 <h2>Special Patcher Settings</h2>
 <p>There are several special patcher settings that are used by UPF internally.</p>
 
-<api-items items="patcherSettings"></api-items>
+<api-items module="unifiedPatchingFramework" path="patcherSettings.json"></api-items>
 
 <h2>Patcher Locals</h2>
 <p>The locals object is passed to all patcher functions.  The locals object allows you to persist variables across all steps of your patcher's execution.  It's recommended to use the locals object over using variables defined directly in your module because the locals object does not persist between patcher executions.</p>
