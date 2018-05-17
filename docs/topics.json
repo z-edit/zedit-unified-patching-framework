@@ -1,0 +1,37 @@
+[{
+  "path": "Modules/Core Modules",
+  "topic": {
+    "label": "Unified Patching Framework",
+    "templateUrl": "/docs/overview.html"
+  }
+}, {
+  "path": "Modules",
+  "topic": {
+    "label": "Patcher Modules",
+    "templateUrl": "/docs/patcherModules.html"
+  }
+}, {
+  "path": "Modal Views",
+  "topic": {
+    "label": "Manage Patchers Modal",
+    "templateUrl": "/docs/managePatchersModal.html"
+  }
+}, {
+  "path": "Modal Views/Manage Patchers Modal",
+  "topic": {
+    "label": "Build Patches Tab",
+    "templateUrl": "/docs/buildPatches.html"
+  }
+}, {
+  "path": "Modal Views/Settings Modal",
+  "topic": {
+    "label": "UPF Settings Tab",
+    "templateUrl": "/docs/upfSettings.html"
+  }
+}, {
+  "path": "Development/APIs",
+  "topic": {
+    "label": "UPF Patcher API",
+    "templateUrl": "/docs/api.html"
+  }
+}]

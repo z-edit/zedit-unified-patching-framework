@@ -628,76 +628,6 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
         console.log(`Generated ${patchFileName} in ${new Date() - start}ms`);
     };
 });
-ngapp.controller('upfOverviewController', function($scope) {
-    $scope.games = xelib.games;
-    $scope.upfPages = [
-        'Development/APIs/UPF Patcher API',
-        'Modal Views/Manage Patchers Modal',
-        'Modules/Patcher Modules',
-        'Modal Views/Settings Modal/UPF Settings Tab'
-    ].map(function(path) {
-        return {
-            label: path.split('/').last(),
-            path: path
-        };
-    });
-});
-
-ngapp.controller('upfPatcherApiController', function($scope) {
-    let apiFiles = ['patcherSchema', 'patcherHelpers', 'patcherSettings'];
-    apiFiles.forEach(function(label) {
-        let path = `modules/${info.id}/docs/${label}.json`;
-        $scope[label] = fh.loadJsonFile(path);
-    });
-});
-
-ngapp.controller('patcherModulesController', function($scope) {
-    let path = `modules/${info.id}/docs/patcherVariables.json`;
-    $scope.patcherVariables = fh.loadJsonFile(path);
-});
-
-let topics = [{
-    path: 'Modules/Core Modules',
-    topic: {
-        label: 'Unified Patching Framework',
-        templateUrl: `${moduleUrl}/docs/overview.html`,
-        controller: 'upfOverviewController'
-    }
-}, {
-    path: 'Modules',
-    topic: {
-        label: 'Patcher Modules',
-        templateUrl: `${moduleUrl}/docs/patcherModules.html`,
-        controller: 'patcherModulesController'
-    }
-}, {
-    path: 'Modal Views',
-    topic: {
-        label: 'Manage Patchers Modal',
-        templateUrl: `${moduleUrl}/docs/managePatchersModal.html`,
-        children: [{
-            label: 'Build Patches Tab',
-            templateUrl: `${moduleUrl}/docs/buildPatches.html`
-        }]
-    }
-}, {
-    path: 'Modal Views/Settings Modal',
-    topic: {
-        label: 'UPF Settings Tab',
-        templateUrl: `${moduleUrl}/docs/upfSettings.html`
-    }
-}, {
-    path: 'Development/APIs',
-    topic: {
-        label: 'UPF Patcher API',
-        templateUrl: `${moduleUrl}/docs/api.html`,
-        controller: 'upfPatcherApiController'
-    }
-}];
-
-ngapp.run(function(helpService) {
-    topics.forEach(({path, topic}) => helpService.addTopic(topic, path));
-});
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.bannerStyle = {
         'background': `url('${moduleUrl}/images/banner.jpg')`,
@@ -711,13 +641,16 @@ ngapp.controller('upfSettingsController', function($timeout, $scope) {
 });
 // == end source files ==
 
-// add manage patchers context menu item to tree view context menu
-ngapp.run(function(contextMenuFactory) {
+moduleService.deferLoader('UPF');
+ngapp.run(function($rootScope, patcherService, contextMenuFactory, settingsService, hotkeyFactory, buttonFactory) {
+    // add manage patchers context menu item to tree view context menu
     let menuItems = contextMenuFactory.treeViewItems,
-        automateIndex = menuItems.findIndex((item) => { return item.id === 'Automate'; });
+        automateIndex = menuItems.findIndex(item => {
+            return item.id === 'Automate';
+        });
     menuItems.splice(automateIndex + 1, 0, {
         id: 'Manage Patchers',
-        visible: () => { return true; },
+        visible: () => true,
         build: (scope, items) => {
             items.push({
                 label: 'Manage Patchers',
@@ -726,41 +659,33 @@ ngapp.run(function(contextMenuFactory) {
             });
         }
     });
-});
 
-// register settings tab
-ngapp.run(function(settingsService) {
+    // register settings tab
     settingsService.registerSettings({
         appModes: ['edit'],
         label: 'Unified Patching Framework',
         templateUrl: `${moduleUrl}/partials/settings.html`,
         controller: 'upfSettingsController'
     });
-});
 
-// register hotkey
-ngapp.run(function(hotkeyFactory) {
+    // register hotkey
     hotkeyFactory.addHotkeys('editView', {
         p: [{
             modifiers: ['ctrlKey', 'shiftKey'],
             callback: openManagePatchersModal
         }]
     });
-});
 
-// register button
-let managePatchersButton = {
-    class: 'fa fa-puzzle-piece',
-    title: 'Manage Patchers',
-    hidden: true,
-    onClick: (scope) => openManagePatchersModal(scope)
-};
-ngapp.run(function(buttonFactory) {
+    // register button
+    let managePatchersButton = {
+        class: 'fa fa-puzzle-piece',
+        title: 'Manage Patchers',
+        hidden: true,
+        onClick: openManagePatchersModal
+    };
     buttonFactory.buttons.unshift(managePatchersButton);
-});
 
-// register for events
-ngapp.run(function($rootScope, patcherService) {
+    // register for events
     $rootScope.$on('sessionStarted', function(e, selectedProfile) {
         patcherService.updateForGameMode(selectedProfile.gameMode);
     });
@@ -770,12 +695,9 @@ ngapp.run(function($rootScope, patcherService) {
         patcherService.loadSettings();
         $rootScope.$applyAsync(() => managePatchersButton.hidden = false);
     });
-});
 
-// register deferred module loader
-moduleService.deferLoader('UPF');
-ngapp.run(function(patcherService) {
-    moduleService.registerLoader('UPF', function({module, fh}) {
+    // register deferred module loader
+    let upfLoader = function({module, fh, moduleService}) {
         Function.execute({
             registerPatcher: patcherService.registerPatcher,
             fh: fh,
@@ -783,5 +705,8 @@ ngapp.run(function(patcherService) {
             patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
         }, module.code, module.info.id);
-    });
+        moduleService.loadDocs(module.path);
+    };
+
+    moduleService.registerLoader('UPF', upfLoader);
 });
