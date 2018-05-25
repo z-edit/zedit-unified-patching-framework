@@ -215,11 +215,16 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
 
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
 
+    let getExecutor = function(patcher) {
+        return patcher.execute.constructor === Function ?
+            patcher.execute(0, {}, {}, {}) : patcher.execute;
+    };
+
     let getMaxProgress = function(patchPlugin) {
         return patchPlugin.patchers.filterOnKey('active').mapOnKey('id')
             .map(patcherService.getPatcher)
-            .reduce(function(sum, patcher) {
-                let exec = patcher.execute,
+            .reduce((sum, patcher) => {
+                let exec = getExecutor(patcher),
                     files = patcher.filesToPatch;
                 if (exec.customProgress) return exec.customProgress(files);
                 return sum + 2 + 3 * exec.process.length * files.length;
@@ -227,7 +232,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     };
 
     let getTotalMaxProgress = function(patchPlugins) {
-        return patchPlugins.reduce(function(sum, patchPlugin) {
+        return patchPlugins.reduce((sum, patchPlugin) => {
             return sum + getMaxProgress(patchPlugin);
         }, 0);
     };
@@ -265,9 +270,8 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         xelib.CreateHandleGroup();
         openProgressModal(maxProgress);
         $timeout(function() {
-            let success = errorService.try(() => {
-                activePatchPlugins.forEach(build);
-            });
+            let success = errorService.try(() =>
+                activePatchPlugins.forEach(build));
             patcherService.saveSettings();
             progressDone(activePatchPlugins, success);
             cache = {};
@@ -442,7 +446,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, customProgress, patcher, patcherSettings,
-            helpers, locals;
+            helpers, locals = {};
 
         // helper functions
         let progressMessage = (title) => progressService.progressMessage(title);
@@ -568,18 +572,24 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             exec.finalize(patchFile, helpers, patcherSettings, locals);
         };
 
+        let getExecutor = function() {
+            return patcher.execute.constructor === Function ?
+                patcher.execute(patchFile, helpers, patcherSettings, locals) :
+                patcher.execute;
+        };
+
         let patcherId = patcherInfo.id;
         filesToPatch = patcherInfo.filesToPatch;
         patcher = patcherService.getPatcher(patcherId);
-        customProgress = patcher.execute.customProgress;
-        patcherSettings = patcherService.settings[patcherId];
         helpers = getPatcherHelpers();
+        patcherSettings = patcherService.settings[patcherId];
+        executor = getExecutor();
+        customProgress = executor.customProgress;
         if (customProgress) helpers.addProgress = addProgress;
-        locals = {};
 
-        initialize(patcher.execute);
-        process(patcher.execute);
-        finalize(patcher.execute);
+        initialize(executor);
+        process(executor);
+        finalize(executor);
     };
 });
 ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
