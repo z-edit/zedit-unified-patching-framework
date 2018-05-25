@@ -20,6 +20,12 @@
         "description": "The label used for the tab in the manage patchers modal."
       },
       {
+        "name": "hide",
+        "type": "boolean",
+        "icons": ["optional"],
+        "description": "Set to true to not display a settings tab in the manage patchers modal for your patcher."
+      },
+      {
         "name": "templateUrl",
         "type": "string",
         "description": "URL to the HTML template to use for the settings tab.  You'll want to include the `patcherPath` in this URL.  E.g. ``${patcherPath}/partials/settings.html``."
@@ -27,7 +33,7 @@
       {
         "name": "controller",
         "type": "function",
-        "optional": true,
+        "icons": ["optional"],
         "description": "Controller function for use on the settings tab.  Can use dependency injection per AngularJS."
       },
       {
@@ -39,24 +45,25 @@
   },
   {
     "name": "requiredFiles",
-    "type": "array of string",
-    "optional": true,
-    "description": "Array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
-  },
-  {
-    "name": "requiredFiles",
     "type": "function",
+    "icons": ["optional"],
     "args": [],
     "returns": {
       "type": "array of string"
     },
-    "optional": true,
-    "description": "You can use a function for `requiredFiles` if you need to require different plugin files conditionally."
+    "description": "Return an array of filenames which must be loaded for the patcher to run.  Your patcher will be disabled if any file from this array is not loaded.  Your patcher will also be disabled if a required file is loaded after the patch plugin the patcher has been assigned to."
+  },
+  {
+    "name": "requiredFiles",
+    "type": "array of string",
+    "icons": ["optional"],
+    "legacy": true,
+    "description": "Legacy option to provide required files as an array directly."
   },
   {
     "name": "getFilesToPatch",
     "type": "function",
-    "optional": true,
+    "icons": ["optional"],
     "args": [{
       "name": "filenames",
       "type": "array of string",
@@ -69,12 +76,35 @@
   },
   {
     "name": "execute",
-    "type": "object",
+    "type": "function",
+    "args": [{
+      "name": "patch",
+      "type": "handle",
+      "description": "Handle for the patch plugin your patcher is using."
+    }, {
+      "name": "helpers",
+      "type": "object",
+      "description": "Patcher helpers."
+    }, {
+      "name": "settings",
+      "type": "object",
+      "description": "Your patcher's settings."
+    }, {
+      "name": "locals",
+      "type": "object",
+      "description": "Patcher locals."
+    }],
+    "returns": {
+      "type": "object",
+      "description": "An Executor object."
+    },
+    "description": "This function gets called when your patcher is executed.  It should return an Executor object as described by the schema below.",
+    "itemsLabel": "Executor",
     "items": [
       {
         "name": "customProgress",
         "type": "function",
-        "optional": true,
+        "icons": ["optional"],
         "args": [{
           "name": "filesToPatch",
           "type": "array of string",
@@ -88,9 +118,9 @@
       {
         "name": "initialize",
         "type": "function",
-        "optional": true,
+        "icons": ["optional"],
         "args": [{
-          "name": "patch",
+          "name": "patchFile",
           "type": "handle",
           "description": "Handle for the patch plugin your patcher is using."
         }, {
@@ -128,13 +158,13 @@
               {
                 "name": "overrides",
                 "type": "boolean",
-                "optional": true,
+                "icons": ["optional"],
                 "description": "Pass true to include override records.  Override records are not included by default."
               },
               {
                 "name": "filter",
                 "type": "function",
-                "optional": true,
+                "icons": ["optional"],
                 "args": [{
                   "name": "record",
                   "type": "handle"
@@ -149,7 +179,7 @@
           {
             "name": "load",
             "type": "function",
-            "optional": true,
+            "legacy": true,
             "args": [{
               "name": "plugin",
               "type": "handle",
@@ -168,14 +198,15 @@
               "description": "Patcher locals."
             }],
             "returns": {
-              "type": "object"
+              "type": "object",
+              "description": "A Load Options object."
             },
-            "description": "You can use a function for `load` if you need to skip certain plugins conditionally, but it is not recommended.  Return null or undefined to skip loading records from a plugin, else return a load options object."
+            "description": "Legacy support for using a function instead of providing a load options object directly.  Return null or undefined to skip loading records from a plugin, else return a load options object."
           },
           {
             "name": "patch",
             "type": "function",
-            "optional": true,
+            "icons": ["optional"],
             "args": [{
               "name": "record",
               "type": "handle",
@@ -200,9 +231,9 @@
       {
         "name": "finalize",
         "type": "function",
-        "optional": true,
+        "icons": ["optional"],
         "args": [{
-          "name": "patch",
+          "name": "patchFile",
           "type": "handle",
           "description": "Handle for the patch plugin your patcher is using."
         }, {
@@ -221,5 +252,11 @@
         "description": "Called after processing.  Can be used to perform any cleanup/final steps once your patcher has finished executing.  Note that UPF automatically removes ITPO records and unused masters, so you don't need to do that here."
       }
     ]
+  },
+  {
+    "name": "execute",
+    "type": "object",
+    "legacy": true,
+    "description": "Legacy support for providing an Executor object directly instead of returning it from a function.  Using this format means you must access `patchFile`, `helpers`, `settings`, and `locals` from arguments passed to the `initialize`, `finalize`, `load`, and `patch` function calls.  This syntax is not recommended."
   }
 ]
