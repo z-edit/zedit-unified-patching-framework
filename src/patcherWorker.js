@@ -1,7 +1,7 @@
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, customProgress, patcher, patcherSettings,
-            helpers, locals;
+            helpers, locals = {};
 
         // helper functions
         let progressMessage = (title) => progressService.progressMessage(title);
@@ -127,17 +127,23 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             exec.finalize(patchFile, helpers, patcherSettings, locals);
         };
 
+        let getExecutor = function() {
+            return patcher.execute.constructor === Function ?
+                patcher.execute(patchFile, helpers, patcherSettings, locals) :
+                patcher.execute;
+        };
+
         let patcherId = patcherInfo.id;
         filesToPatch = patcherInfo.filesToPatch;
         patcher = patcherService.getPatcher(patcherId);
-        customProgress = patcher.execute.customProgress;
-        patcherSettings = patcherService.settings[patcherId];
         helpers = getPatcherHelpers();
+        patcherSettings = patcherService.settings[patcherId];
+        executor = getExecutor();
+        customProgress = executor.customProgress;
         if (customProgress) helpers.addProgress = addProgress;
-        locals = {};
 
-        initialize(patcher.execute);
-        process(patcher.execute);
-        finalize(patcher.execute);
+        initialize(executor);
+        process(executor);
+        finalize(executor);
     };
 });
