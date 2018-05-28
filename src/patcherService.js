@@ -91,6 +91,15 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         patchers.push(patcher);
     };
 
+    this.reloadPatchers = function() {
+        let patcherIds = patchers.map(patcher => patcher.info.id);
+        patchers = [];
+        patcherIds.forEach(id => {
+            let patcherPath = fh.jetpack.path(`modules\\${id}`);
+            moduleService.loadModule(patcherPath);
+        });
+    };
+
     this.updateForGameMode = function(gameMode) {
         patchers = patchers.filter(patcher => {
             return patcher.gameModes.includes(gameMode);

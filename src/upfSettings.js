@@ -1,4 +1,4 @@
-ngapp.controller('upfSettingsController', function($timeout, $scope) {
+ngapp.controller('upfSettingsController', function($timeout, $scope, patcherService) {
     $scope.bannerStyle = {
         'background': `url('${moduleUrl}/images/banner.jpg')`,
         'background-size': 'cover'
@@ -8,4 +8,6 @@ ngapp.controller('upfSettingsController', function($timeout, $scope) {
         $scope.saveSettings(false);
         $timeout(() => openManagePatchersModal($scope));
     };
+
+    $scope.reloadPatchers = patcherService.reloadPatchers;
 });
