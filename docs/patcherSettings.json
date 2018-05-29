@@ -1,10 +1,5 @@
 [
   {
-    "name": "cache",
-    "type": "object",
-    "description": "The FormID cache used for form ID consistency when the user regenerates the patch file.  You should never write directly to this setting."
-  },
-  {
     "name": "ignoredFiles",
     "type": "array of string",
     "description": "Array of filenames to ignore when patching.  The `ignore-plugins` directive sets this value."
