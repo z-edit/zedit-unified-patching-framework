@@ -75,7 +75,8 @@ ngapp.run(function($rootScope, patcherService, contextMenuFactory, settingsServi
             patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
         }, module.code, module.info.id);
-        moduleService.loadDocs(module.path);
+        if (moduleService.hasOwnProperty('loadDocs'))
+            moduleService.loadDocs(module.path);
     };
 
     moduleService.registerLoader('UPF', upfLoader);
