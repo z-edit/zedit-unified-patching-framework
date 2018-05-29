@@ -58,9 +58,10 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         xelib.CreateHandleGroup();
         openProgressModal(maxProgress);
         $timeout(function() {
+            patcherService.loadCache();
             let success = errorService.try(() =>
                 activePatchPlugins.forEach(build));
-            patcherService.saveSettings();
+            success ? patcherService.saveCache() : patcherService.loadCache();
             progressDone(activePatchPlugins, success);
             cache = {};
             xelib.FreeHandleGroup();

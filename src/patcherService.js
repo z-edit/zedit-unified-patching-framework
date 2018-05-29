@@ -115,8 +115,18 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         buildTabs();
     };
 
+    this.loadCache = function() {
+        let profileName = settingsService.currentProfile;
+        service.cachePath = `profiles/${profileName}/patcherCache.json`;
+        service.cache = fh.loadJsonFile(service.cachePath) || {};
+    };
+
     this.saveSettings = function() {
         fh.saveJsonFile(service.settingsPath, service.settings);
+    };
+
+    this.saveCache = function() {
+        fh.saveJsonFile(service.cachePath, service.cache);
     };
 
     this.getTabs = function() {
@@ -146,7 +156,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.updateFilesToPatch = function() {
-        patchers.forEach(function(patcher) {
+        patchers.forEach(patcher => {
             patcher.availableFiles = getAvailableFiles(patcher);
             patcher.filesToPatch = service.getFilesToPatch(patcher);
         });
@@ -154,7 +164,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 
     this.getPatchPlugins = function() {
         let patchPlugins = [];
-        patchers.forEach(function(patcher) {
+        patchers.forEach(patcher => {
             let patchPlugin = getPatchPlugin(patcher, patchPlugins),
                 disabled = getPatcherDisabled(patcher);
             patchPlugin.patchers.push({

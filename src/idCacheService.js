@@ -1,6 +1,6 @@
 ngapp.service('idCacheService', function(patcherService) {
     let prepareIdCache = function(patchFile) {
-        let cache = patcherService.settings.cache,
+        let cache = patcherService.cache,
             fileName = xelib.Name(patchFile);
         if (!cache.hasOwnProperty(fileName)) cache[fileName] = {};
         return cache[fileName];
