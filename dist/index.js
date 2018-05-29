@@ -84,7 +84,7 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
 
 ngapp.service('idCacheService', function(patcherService) {
     let prepareIdCache = function(patchFile) {
-        let cache = patcherService.settings.cache,
+        let cache = patcherService.cache,
             fileName = xelib.Name(patchFile);
         if (!cache.hasOwnProperty(fileName)) cache[fileName] = {};
         return cache[fileName];
@@ -97,7 +97,8 @@ ngapp.service('idCacheService', function(patcherService) {
     };
 
     this.cacheRecord = function(patchFile) {
-        let idCache = prepareIdCache(patchFile),
+        let patchOrd = xelib.GetFileLoadOrder(patchFile) * 0x1000000,
+            idCache = prepareIdCache(patchFile),
             usedIds = {};
 
         updateNextFormId(patchFile, idCache);
@@ -107,9 +108,9 @@ ngapp.service('idCacheService', function(patcherService) {
             if (usedIds.hasOwnProperty(id))
                 throw new Error(`cacheRecord: ${id} is not unique.`);
             if (idCache.hasOwnProperty(id)) {
-                xelib.SetFormID(rec, idCache[id], true, false);
+                xelib.SetFormID(rec, patchOrd + idCache[id], false, false);
             } else {
-                idCache[id] = xelib.GetFormID(rec, true);
+                idCache[id] = xelib.GetFormID(rec, false, true);
             }
             if (xelib.HasElement(rec, 'EDID')) xelib.SetValue(rec, 'EDID', id);
             usedIds[id] = true;
@@ -270,9 +271,10 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         xelib.CreateHandleGroup();
         openProgressModal(maxProgress);
         $timeout(function() {
+            patcherService.loadCache();
             let success = errorService.try(() =>
                 activePatchPlugins.forEach(build));
-            patcherService.saveSettings();
+            success ? patcherService.saveCache() : patcherService.loadCache();
             progressDone(activePatchPlugins, success);
             cache = {};
             xelib.FreeHandleGroup();
@@ -373,6 +375,15 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         patchers.push(patcher);
     };
 
+    this.reloadPatchers = function() {
+        let patcherIds = patchers.map(patcher => patcher.info.id);
+        patchers = [];
+        patcherIds.forEach(id => {
+            let patcherPath = fh.jetpack.path(`modules\\${id}`);
+            moduleService.loadModule(patcherPath);
+        });
+    };
+
     this.updateForGameMode = function(gameMode) {
         patchers = patchers.filter(patcher => {
             return patcher.gameModes.includes(gameMode);
@@ -388,8 +399,18 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         buildTabs();
     };
 
+    this.loadCache = function() {
+        let profileName = settingsService.currentProfile;
+        service.cachePath = `profiles/${profileName}/patcherCache.json`;
+        service.cache = fh.loadJsonFile(service.cachePath) || {};
+    };
+
     this.saveSettings = function() {
         fh.saveJsonFile(service.settingsPath, service.settings);
+    };
+
+    this.saveCache = function() {
+        fh.saveJsonFile(service.cachePath, service.cache);
     };
 
     this.getTabs = function() {
@@ -419,7 +440,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     this.updateFilesToPatch = function() {
-        patchers.forEach(function(patcher) {
+        patchers.forEach(patcher => {
             patcher.availableFiles = getAvailableFiles(patcher);
             patcher.filesToPatch = service.getFilesToPatch(patcher);
         });
@@ -427,7 +448,7 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
 
     this.getPatchPlugins = function() {
         let patchPlugins = [];
-        patchers.forEach(function(patcher) {
+        patchers.forEach(patcher => {
             let patchPlugin = getPatchPlugin(patcher, patchPlugins),
                 disabled = getPatcherDisabled(patcher);
             patchPlugin.patchers.push({
@@ -638,7 +659,7 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
         console.log(`Generated ${patchFileName} in ${new Date() - start}ms`);
     };
 });
-ngapp.controller('upfSettingsController', function($timeout, $scope) {
+ngapp.controller('upfSettingsController', function($timeout, $scope, patcherService) {
     $scope.bannerStyle = {
         'background': `url('${moduleUrl}/images/banner.jpg')`,
         'background-size': 'cover'
@@ -648,6 +669,8 @@ ngapp.controller('upfSettingsController', function($timeout, $scope) {
         $scope.saveSettings(false);
         $timeout(() => openManagePatchersModal($scope));
     };
+
+    $scope.reloadPatchers = patcherService.reloadPatchers;
 });
 // == end source files ==
 
@@ -715,7 +738,8 @@ ngapp.run(function($rootScope, patcherService, contextMenuFactory, settingsServi
             patcherUrl: fh.pathToFileUrl(module.path),
             patcherPath: module.path
         }, module.code, module.info.id);
-        moduleService.loadDocs(module.path);
+        if (moduleService.hasOwnProperty('loadDocs'))
+            moduleService.loadDocs(module.path);
     };
 
     moduleService.registerLoader('UPF', upfLoader);
