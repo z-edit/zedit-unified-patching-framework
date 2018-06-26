@@ -28,7 +28,7 @@
       {
         "name": "templateUrl",
         "type": "string",
-        "description": "URL to the HTML template to use for the settings tab.  You'll want to include the `patcherPath` in this URL.  E.g. ``${patcherPath}/partials/settings.html``."
+        "description": "URL to the HTML template to use for the settings tab.  You'll want to use the `patcherUrl` global in this URL.  E.g. `${patcherUrl}/partials/settings.html`."
       },
       {
         "name": "controller",
