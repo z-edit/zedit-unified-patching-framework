@@ -211,7 +211,7 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
         selectTab(tab);
     };
 });
-ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService) {
+ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService, settingsService) {
     let cache = {};
 
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
@@ -242,9 +242,9 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         $rootScope.$broadcast('closeModal');
         progressService.showProgress({
             determinate: true,
+            echo: true,
             title: 'Running Patchers',
             message: 'Initializing...',
-            log: [],
             current: 0,
             max: maxProgress
         });
