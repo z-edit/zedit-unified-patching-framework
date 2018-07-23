@@ -9,6 +9,9 @@ Check out the following patchers to get an idea of how to use UPF:
 - [NPC Enchant Fix](https://github.com/hishutup/hishy-npc-enchant-fix)
 - [Cell Encounter Level in Name](https://github.com/hishutup/hishy-cell-encounter-level-in-name)
 - [Khajiit Ears Show](https://github.com/hishutup/hishy-khajiit-ears-show)
+- [dualSheathRedux](https://github.com/Qudix/dualSheathRedux)
+- [loadScreenRemover](https://github.com/Qudix/loadScreenRemover)
+- [oppositeAnimationDisabler](https://github.com/Qudix/oppositeAnimationDisabler)
 - [Reproccer Reborn](https://github.com/jdsmith2816/reproccer-reborn)
 
 ## installation
