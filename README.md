@@ -11,6 +11,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - [Khajiit Ears Show](https://github.com/hishutup/hishy-khajiit-ears-show)
 - [Total Equipment Overhaul (TEO)](https://www.nexusmods.com/skyrimspecialedition/mods/18157)
 - [True Unleveled Skyrim (TUS)](https://www.nexusmods.com/skyrimspecialedition/mods/18342)
+- [Hunterborn Patcher](https://www.nexusmods.com/skyrimspecialedition/mods/17993)
 - [dualSheathRedux](https://github.com/Qudix/dualSheathRedux)
 - [loadScreenRemover](https://github.com/Qudix/loadScreenRemover)
 - [oppositeAnimationDisabler](https://github.com/Qudix/oppositeAnimationDisabler)
