@@ -140,7 +140,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         patcherSettings = patcherService.settings[patcherId];
         executor = getExecutor();
         customProgress = executor.customProgress;
-        if (customProgress) helpers.addProgress = addProgress;
+        if (customProgress)
+            Object.assign(helpers, { addProgress, progressMessage });
 
         initialize(executor);
         process(executor);
