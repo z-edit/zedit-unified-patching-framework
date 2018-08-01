@@ -47,10 +47,12 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
     $scope.removePatchPlugin = (index) => $scope.patchPlugins.splice(index, 1);
 
     $scope.buildPatchPlugin = function(patchPlugin) {
+        patcherService.saveSettings();
         patchBuilder.buildPatchPlugins([patchPlugin]);
     };
 
     $scope.buildAllPatchPlugins = function() {
+        patcherService.saveSettings();
         patchBuilder.buildPatchPlugins($scope.patchPlugins);
     };
 
