@@ -14,8 +14,9 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
             .reduce((sum, patcher) => {
                 let exec = getExecutor(patcher),
                     files = patcher.filesToPatch;
-                if (exec.customProgress) return exec.customProgress(files);
-                return sum + 2 + 3 * exec.process.length * files.length;
+                return sum + exec.customProgress ?
+                        exec.customProgress(files) :
+                        2 + 3 * exec.process.length * files.length;
             }, 1);
     };
 
