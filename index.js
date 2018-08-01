@@ -57,10 +57,12 @@ ngapp.controller('buildPatchesController', function($scope, $q, patcherService, 
     $scope.removePatchPlugin = (index) => $scope.patchPlugins.splice(index, 1);
 
     $scope.buildPatchPlugin = function(patchPlugin) {
+        patcherService.saveSettings();
         patchBuilder.buildPatchPlugins([patchPlugin]);
     };
 
     $scope.buildAllPatchPlugins = function() {
+        patcherService.saveSettings();
         patchBuilder.buildPatchPlugins($scope.patchPlugins);
     };
 
@@ -211,7 +213,7 @@ ngapp.controller('managePatchersModalController', function($scope, patcherServic
         selectTab(tab);
     };
 });
-ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService, settingsService) {
+ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService) {
     let cache = {};
 
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
@@ -221,14 +223,22 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
             patcher.execute(0, {}, {}, {}) : patcher.execute;
     };
 
+    let getProcessSize = function(process, files) {
+        exec.process.reduce((sum, block) => {
+            if (block.records) return sum + 1 + !!block.patch;
+            if (block.load) return files.length * (2 + !!block.patch);
+            return sum;
+        }, 0);
+    };
+
     let getMaxProgress = function(patchPlugin) {
         return patchPlugin.patchers.filterOnKey('active').mapOnKey('id')
             .map(patcherService.getPatcher)
             .reduce((sum, patcher) => {
-                let exec = getExecutor(patcher),
+                let {customProgress, process} = getExecutor(patcher),
                     files = patcher.filesToPatch;
-                if (exec.customProgress) return exec.customProgress(files);
-                return sum + 2 + 3 * exec.process.length * files.length;
+                return sum + customProgress ? customProgress(files) :
+                    2 + getProcessSize(process, files);
             }, 1);
     };
 
@@ -564,14 +574,32 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             }, interApiService.getApi('UPF'));
         };
 
-        let executeBlock = function({load, patch}) {
-            if (!load) return;
+        let loadAndPatch = function(load, patch) {
             filesToPatch.forEach(filename => {
                 let recordsToPatch = getRecordsToPatch(load, filename);
                 if (patch && recordsToPatch.length > 0)
                     return patchRecords(load, patch, filename, recordsToPatch);
                 if (!customProgress) addProgress(1);
             });
+        };
+
+        let recordsAndPatch = function(records, patch, label = 'records') {
+            patcherProgress(`Getting ${label}`);
+            let r = records(filesToPatch, helpers, patcherSettings, locals);
+            if (!patch || !r || r.length === 0) return;
+            patcherProgress(`Patching ${r.length} ${label}`);
+            r.forEach(function(record) {
+                let patchRecord = xelib.CopyElement(record, patchFile, false);
+                patch(patchRecord, helpers, patcherSettings, locals);
+            });
+        };
+
+        let executeBlock = function({load, records, label, patch}) {
+            if (records) {
+                recordsAndPatch(records, patch, label);
+            } else if (load) {
+                loadAndPatch(load, patch);
+            }
         };
 
         let initialize = function(exec) {
@@ -606,7 +634,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         patcherSettings = patcherService.settings[patcherId];
         executor = getExecutor();
         customProgress = executor.customProgress;
-        if (customProgress) helpers.addProgress = addProgress;
+        if (customProgress)
+            Object.assign(helpers, { addProgress, progressMessage });
 
         initialize(executor);
         process(executor);
