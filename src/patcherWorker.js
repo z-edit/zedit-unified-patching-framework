@@ -98,14 +98,32 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             }, interApiService.getApi('UPF'));
         };
 
-        let executeBlock = function({load, patch}) {
-            if (!load) return;
+        let loadAndPatch = function(load, patch) {
             filesToPatch.forEach(filename => {
                 let recordsToPatch = getRecordsToPatch(load, filename);
                 if (patch && recordsToPatch.length > 0)
                     return patchRecords(load, patch, filename, recordsToPatch);
                 if (!customProgress) addProgress(1);
             });
+        };
+
+        let recordsAndPatch = function(records, patch, label = 'records') {
+            patcherProgress(`Getting ${label}`);
+            let r = records(filesToPatch, helpers, patcherSettings, locals);
+            if (!patch || r.length === 0) return;
+            patcherProgress(`Patching ${r.length} ${label}`);
+            r.forEach(function(record) {
+                let patchRecord = xelib.CopyElement(record, patchFile, false);
+                patch(patchRecord, helpers, patcherSettings, locals);
+            });
+        };
+
+        let executeBlock = function({load, records, label, patch}) {
+            if (records) {
+                recordsAndPatch(records, patch, label);
+            } else if (load) {
+                loadAndPatch(load, patch);
+            }
         };
 
         let initialize = function(exec) {
