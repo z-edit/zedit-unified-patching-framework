@@ -110,7 +110,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let recordsAndPatch = function(records, patch, label = 'records') {
             patcherProgress(`Getting ${label}`);
             let r = records(filesToPatch, helpers, patcherSettings, locals);
-            if (!patch || r.length === 0) return;
+            if (!patch || !r || r.length === 0) return;
             patcherProgress(`Patching ${r.length} ${label}`);
             r.forEach(function(record) {
                 let patchRecord = xelib.CopyElement(record, patchFile, false);
