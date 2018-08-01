@@ -201,33 +201,7 @@
               "type": "object",
               "description": "A Load Options object."
             },
-            "description": "Legacy support for using a function instead of providing a load options object directly.  Return a falsy value to skip loading records from a plugin, else return a load options object."
-          },
-          {
-            "name": "records",
-            "type": "function",
-            "args": [{
-              "name": "filesToPatch",
-              "type": "array of handle",
-              "description": "Handles for plugins being patched."
-            }, {
-              "name": "helpers",
-              "type": "object",
-              "description": "Patcher helpers."
-            }, {
-              "name": "settings",
-              "type": "object",
-              "description": "Your patcher's settings."
-            }, {
-              "name": "locals",
-              "type": "object",
-              "description": "Patcher locals."
-            }],
-            "returns": {
-              "type": "array of handle",
-              "description": "Array of records to patch."
-            },
-            "description": "Can be used as an alternative to `load`.  Return an array of records to be patched.  Return an empty array or a falsy value to not copy any records to the patch file."
+            "description": "Legacy support for using a function instead of providing a load options object directly.  Return null or undefined to skip loading records from a plugin, else return a load options object."
           },
           {
             "name": "patch",
