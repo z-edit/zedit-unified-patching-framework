@@ -1,4 +1,4 @@
-ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService, settingsService) {
+ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService) {
     let cache = {};
 
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
