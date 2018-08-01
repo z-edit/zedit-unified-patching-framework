@@ -53,5 +53,14 @@
       "type": "number"
     }],
     "description": "Only available when `customProgress` is set in your patcher's execute block.  Adds `amount` to the progress bar."
+  },
+  {
+    "name": "progressMessage",
+    "type": "function",
+    "args": [{
+      "name": "message",
+      "type": "string"
+    }],
+    "description": "Only available when `customProgress` is set in your patcher's execute block.  Sets the progress message displayed above the progress bar to `message`."
   }
 ]
