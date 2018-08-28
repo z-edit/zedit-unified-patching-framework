@@ -92,6 +92,9 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                         return records.concat(a);
                     }, []);
                 },
+                copyToPatch: function(rec, asNew = false) {
+                    return xelib.CopyElement(rec, patchFile, asNew);
+                },
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
                 cacheRecord: idCacheService.cacheRecord(patchFile)
