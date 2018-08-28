@@ -1,7 +1,5 @@
 /* global ngapp, xelib, moduleUrl, moduleService */
-
-// helper variables and functions
-const openManagePatchersModal = function(scope) {
+let openManagePatchersModal = function(scope) {
     scope.$emit('openModal', 'managePatchers', {
         basePath: `${moduleUrl}/partials`
     });
@@ -292,7 +290,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
         }, 50);
     };
 });
-ngapp.service('patcherService', function($rootScope, settingsService) {
+ngapp.service('patcherService', function($rootScope, $cacheFactory, settingsService) {
     const disabledHintBase =
         'This patcher is disabled because the following required' +
         '\r\nfiles are not available to the patch plugin:';
@@ -473,6 +471,16 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
         return patchPlugins;
     };
+
+    $rootScope.$on('reloadPatchers', () => {
+        tabs.forEach(tab => {
+            if (!tab.templateUrl) return;
+            $cacheFactory.get('templates').remove(tab.templateUrl);
+        });
+        tabs = [];
+        service.reloadPatchers();
+        service.loadSettings();
+    });
 });
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
@@ -567,6 +575,9 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                         let a = getRecords(fn, search, includeOverrides);
                         return records.concat(a);
                     }, []);
+                },
+                copyToPatch: function(rec, asNew = false) {
+                    return xelib.CopyElement(rec, patchFile, asNew);
                 },
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
@@ -688,7 +699,7 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
         console.log(`Generated ${patchFileName} in ${new Date() - start}ms`);
     };
 });
-ngapp.controller('upfSettingsController', function($timeout, $scope, patcherService) {
+ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.bannerStyle = {
         'background': `url('${moduleUrl}/images/banner.jpg')`,
         'background-size': 'cover'
@@ -699,7 +710,7 @@ ngapp.controller('upfSettingsController', function($timeout, $scope, patcherServ
         $timeout(() => openManagePatchersModal($scope));
     };
 
-    $scope.reloadPatchers = patcherService.reloadPatchers;
+    $scope.reloadPatchers = () => $scope.$emit('reloadPatchers');
 });
 // == end source files ==
 
@@ -735,6 +746,13 @@ ngapp.run(function($rootScope, patcherService, contextMenuFactory, settingsServi
         p: [{
             modifiers: ['ctrlKey', 'shiftKey'],
             callback: openManagePatchersModal
+        }],
+        f5: [{
+            modifiers: ['altKey'],
+            callback: scope => {
+                if (scope.$root.modalActive) return;
+                scope.$emit('reloadPatchers')
+            }
         }]
     });
 
