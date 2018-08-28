@@ -179,4 +179,6 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         });
         return patchPlugins;
     };
+
+    $rootScope.$on('reloadPatchers', service.reloadPatchers);
 });

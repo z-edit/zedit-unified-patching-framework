@@ -1,7 +1,5 @@
 /* global ngapp, xelib, moduleUrl, moduleService */
-
-// helper variables and functions
-const openManagePatchersModal = function(scope) {
+let openManagePatchersModal = function(scope) {
     scope.$emit('openModal', 'managePatchers', {
         basePath: `${moduleUrl}/partials`
     });
@@ -43,6 +41,13 @@ ngapp.run(function($rootScope, patcherService, contextMenuFactory, settingsServi
         p: [{
             modifiers: ['ctrlKey', 'shiftKey'],
             callback: openManagePatchersModal
+        }],
+        f5: [{
+            modifiers: ['altKey'],
+            callback: scope => {
+                if (scope.$root.modalActive) return;
+                scope.$emit('reloadPatchers')
+            }
         }]
     });
 
