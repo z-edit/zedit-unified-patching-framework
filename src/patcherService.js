@@ -1,4 +1,4 @@
-ngapp.service('patcherService', function($rootScope, settingsService) {
+ngapp.service('patcherService', function($rootScope, $cacheFactory, settingsService) {
     const disabledHintBase =
         'This patcher is disabled because the following required' +
         '\r\nfiles are not available to the patch plugin:';
@@ -181,6 +181,10 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
     };
 
     $rootScope.$on('reloadPatchers', () => {
+        tabs.forEach(tab => {
+            if (!tab.templateUrl) return;
+            $cacheFactory.get('templates').remove(tab.templateUrl);
+        });
         tabs = [];
         service.reloadPatchers();
         service.loadSettings();
