@@ -180,5 +180,9 @@ ngapp.service('patcherService', function($rootScope, settingsService) {
         return patchPlugins;
     };
 
-    $rootScope.$on('reloadPatchers', service.reloadPatchers);
+    $rootScope.$on('reloadPatchers', () => {
+        tabs = [];
+        service.reloadPatchers();
+        service.loadSettings();
+    });
 });
