@@ -17,6 +17,24 @@
     "description": "Helper function which allows you to load records from the files your patcher is targeting."
   },
   {
+    "name": "copyToPatch",
+    "type": "function",
+    "args": [{
+      "name": "rec",
+      "type": "handle",
+      "description": "Record to copy."
+    }, {
+      "name": "asNew",
+      "type": "boolean",
+      "description": "Whether or not to copy the record to the patch file as a new record.  Default false."
+    }],
+    "returns": {
+      "type": "handle",
+      "description": "Handle for the record copied to the patch plugin."
+    },
+    "description": "Helper function for copying records to your patch plugin without using a process block.  Useful for copying globals and other individual records.  It's recommended to prefer process blocks over this function."
+  },
+  {
     "name": "allSettings",
     "type": "object",
     "description": "Contains the settings of all patchers, with each patcher's settings in a property corresponding to their id.  Use this if you need to change your patcher's behavior when a user is using another patcher."
