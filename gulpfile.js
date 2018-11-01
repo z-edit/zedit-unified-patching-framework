@@ -10,7 +10,7 @@ gulp.task('clean', function() {
         .pipe(clean());
 });
 
-gulp.task('build', ['clean'], function() {
+gulp.task('build', gulp.series('clean', function(done) {
     gulp.src('index.js')
         .pipe(include())
         .on('error', console.log)
@@ -27,7 +27,9 @@ gulp.task('build', ['clean'], function() {
 
     gulp.src('module.json')
         .pipe(gulp.dest('dist'));
-});
+
+    done();
+}));
 
 gulp.task('release', function() {
     let moduleInfo = JSON.parse(fs.readFileSync('module.json')),
@@ -50,4 +52,4 @@ gulp.task('watch', function() {
     gulp.watch('module.json', ['build']);
 });
 
-gulp.task('default', ['build', 'watch']);
+gulp.task('default', gulp.series('build', 'watch'));
