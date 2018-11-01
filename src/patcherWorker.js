@@ -104,29 +104,25 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let loadAndPatch = function(load, patch) {
             filesToPatch.forEach(filename => {
                 let recordsToPatch = getRecordsToPatch(load, filename);
-                if (patch && recordsToPatch.length > 0)
-                    return patchRecords(load, patch, filename, recordsToPatch);
-                if (!customProgress) addProgress(1);
+                if (patch) patchRecords(load, patch, filename, recordsToPatch);
             });
         };
 
         let recordsAndPatch = function(records, patch, label = 'records') {
             patcherProgress(`Getting ${label}`);
             let r = records(filesToPatch, helpers, patcherSettings, locals);
-            if (!patch || !r || r.length === 0) return;
-            patcherProgress(`Patching ${r.length} ${label}`);
-            r.forEach(function(record) {
+            if (!patch) return;
+            patcherProgress(`Patching ${r ? r.length : 0} ${label}`);
+            r && r.forEach(record => {
                 let patchRecord = xelib.CopyElement(record, patchFile, false);
                 patch(patchRecord, helpers, patcherSettings, locals);
             });
         };
 
-        let executeBlock = function({load, records, label, patch}) {
-            if (records) {
-                recordsAndPatch(records, patch, label);
-            } else if (load) {
-                loadAndPatch(load, patch);
-            }
+        let executeBlock = function({init, load, records, label, patch}) {
+            if (init) init(patchFile, helpers, patcherSettings, locals);
+            if (records) return recordsAndPatch(records, patch, label);
+            if (load) loadAndPatch(load, patch);
         };
 
         let initialize = function(exec) {
@@ -137,9 +133,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let process = function(exec) {
             if (!exec.process) return;
-            exec.process.forEach(function(processBlock) {
-                executeBlock(processBlock);
-            });
+            exec.process.forEach(executeBlock);
         };
 
         let finalize = function(exec) {

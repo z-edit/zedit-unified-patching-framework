@@ -10,20 +10,21 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
 
     let getProcessSize = function(process, files) {
         return process.reduce((sum, block) => {
-            if (block.records) return sum + 1 + !!block.patch;
-            if (block.load) return files.length * (2 + !!block.patch);
+            let patch = block.patch ? 1 : 0;
+            if (block.records) return sum + 1 + patch;
+            if (block.load) return sum + files.length * (2 + patch);
             return sum;
         }, 0);
     };
 
     let getMaxProgress = function(patchPlugin) {
-        return patchPlugin.patchers.filterOnKey('active').mapOnKey('id')
-            .map(patcherService.getPatcher)
+        return patchPlugin.patchers.filterOnKey('active')
+            .map(p => patcherService.getPatcher(p.id))
             .reduce((sum, patcher) => {
                 let {customProgress, process} = getExecutor(patcher),
                     files = patcher.filesToPatch;
-                return sum + customProgress ? customProgress(files) :
-                    2 + getProcessSize(process, files);
+                if (customProgress) return sum + customProgress(files);
+                return sum + 2 + getProcessSize(process, files);
             }, 1);
     };
 
