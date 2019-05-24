@@ -4,10 +4,10 @@ A zEdit module which provides a framework for dynamic patch generation, similar 
 ## patchers
 Check out the following patchers to get an idea of how to use UPF:
 
-- [Example Patcher](https://github.com/matortheeternal/zedit-example-patcher)
+- [Example Patcher](https://github.com/z-edit/zedit-example-patcher)
 - [No Dragon LODs](https://github.com/hishutup/hishy-no-dragon-lods)
-- [NPC Enchant Fix](https://github.com/hishutup/hishy-npc-enchant-fix)
-- [Cell Encounter Level in Name](https://github.com/hishutup/hishy-cell-encounter-level-in-name)
+- [NPC Enchant Fix](https://github.com/z-edit/hishy-npc-enchant-fix)
+- [Cell Encounter Level in Name](https://github.com/z-edit/hishy-cell-encounter-level-in-name)
 - [Khajiit Ears Show](https://github.com/hishutup/hishy-khajiit-ears-show)
 - [Total Equipment Overhaul (TEO)](https://www.nexusmods.com/skyrimspecialedition/mods/18157)
 - [True Unleveled Skyrim (TUS)](https://www.nexusmods.com/skyrimspecialedition/mods/18342)
