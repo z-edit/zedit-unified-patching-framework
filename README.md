@@ -16,6 +16,14 @@ Check out the following patchers to get an idea of how to use UPF:
 - [loadScreenRemover](https://github.com/Qudix/loadScreenRemover)
 - [oppositeAnimationDisabler](https://github.com/Qudix/oppositeAnimationDisabler)
 - [Reproccer Reborn](https://github.com/jdsmith2816/reproccer-reborn)
+- [Skyrim Material Patcher](https://github.com/z-edit/zedit-skyrim-material-patcher)
+- [Pra's zEdit Patchers](https://www.nexusmods.com/fallout4/mods/33858)
+- [Know Your Enemy](https://www.nexusmods.com/skyrimspecialedition/mods/13807)
+- [Randomized Birthstones Skyrim](https://www.nexusmods.com/skyrimspecialedition/mods/23838)
+- [Engarde](https://www.nexusmods.com/skyrim/mods/97404)
+- [Experience Mod](https://www.nexusmods.com/skyrimspecialedition/mods/23589)
+- [zEdit patchers warehouse](https://www.nexusmods.com/skyrimspecialedition/mods/23254)
+- [ENB Light Patcher](https://www.nexusmods.com/skyrimspecialedition/mods/22574)
 
 ## installation
 
