@@ -16,6 +16,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - dualSheathRedux - [github](https://github.com/Qudix/dualSheathRedux)
 - loadScreenRemover - [github](https://github.com/Qudix/loadScreenRemover), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18279/)
 - oppositeAnimationDisabler - [github](https://github.com/Qudix/oppositeAnimationDisabler), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18281)
+- Know Your Enemy - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13807)
 - Reproccer Reborn - [github](https://github.com/jdsmith2816/reproccer-reborn)
 - Skyrim Material Patcher - [github](https://github.com/z-edit/zedit-skyrim-material-patcher)
 - Pra's zEdit Patchers - [nexus](https://www.nexusmods.com/fallout4/mods/33858)
