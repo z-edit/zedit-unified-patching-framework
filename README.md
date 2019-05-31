@@ -17,7 +17,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - loadScreenRemover - [github](https://github.com/Qudix/loadScreenRemover), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18279/)
 - oppositeAnimationDisabler - [github](https://github.com/Qudix/oppositeAnimationDisabler), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18281)
 - Know Your Enemy - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13807)
-- Reproccer Reborn - [github](https://github.com/jdsmith2816/reproccer-reborn)
+- Reproccer Reborn - [github](https://github.com/jdsmith2816/reproccer-reborn), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17913)
 - Skyrim Material Patcher - [github](https://github.com/z-edit/zedit-skyrim-material-patcher)
 - Pra's zEdit Patchers - [nexus](https://www.nexusmods.com/fallout4/mods/33858)
 - SORT - Scripted Overrides that Rename Things - [nexus](https://www.nexusmods.com/skyrim/mods/87820/)
@@ -34,6 +34,11 @@ Check out the following patchers to get an idea of how to use UPF:
 - Save Your Finger - [nexus](https://www.nexusmods.com/fallout4/mods/38781)
 - No Lowered Suppressor and Bayonet Range - [nexus](https://www.nexusmods.com/fallout4/mods/38817)
 - No Lowered Automatic Weapon Damage - [nexus](https://www.nexusmods.com/fallout4/mods/38805)
+- NPC Stat Rescaler - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/24254)
+- Challenging Spell Learning - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/20521)
+- XP Editor - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/24356)
+- Limited Perk Trees - [nexus](https://www.nexusmods.com/skyrim/mods/95540)
+- Pick Your Poison - [nexus](https://www.nexusmods.com/skyrim/mods/96473)
 
 ## installation
 
