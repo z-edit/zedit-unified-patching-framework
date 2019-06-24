@@ -1,3 +1,4 @@
+module.exports = ({ngapp}) =>
 ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, patchPluginWorker, errorService, progressService) {
     let cache = {};
 

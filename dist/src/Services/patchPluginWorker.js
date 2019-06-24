@@ -1,3 +1,4 @@
+module.exports = ({ngapp}) =>
 ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
     this.run = function(cache, patchPlugin) {
         let start = new Date();

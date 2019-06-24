@@ -1,6 +1,7 @@
+module.exports = ({ngapp}) =>
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
-        let filesToPatch, customProgress, patcher, patcherSettings,
+        let filesToPatch, customProgress, patcher, settings,
             helpers, locals = {};
 
         // helper functions
@@ -20,7 +21,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         };
 
         let filterDeletedRecords = function(records) {
-            if (patcherSettings.processDeletedRecords) return records;
+            if (settings.processDeletedRecords) return records;
             return records.filter(function(record) {
                 return !xelib.GetRecordFlag(record, 'Deleted');
             });
@@ -60,7 +61,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let getLoadOpts = function(load, plugin) {
             return load.constructor === Function ?
-                load(plugin, helpers, patcherSettings, locals) : load;
+                load(plugin, helpers, settings, locals) : load;
         };
 
         let getRecordsToPatch = function(load, filename) {
@@ -80,7 +81,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
             recordsToPatch.forEach(function(record) {
                 let patchRecord = xelib.CopyElement(record, patchFile, false);
-                patch(patchRecord, helpers, patcherSettings, locals);
+                patch(patchRecord, helpers, settings, locals);
             });
         };
 
@@ -110,17 +111,18 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let recordsAndPatch = function(records, patch, label = 'records') {
             patcherProgress(`Getting ${label}`);
-            let r = records(filesToPatch, helpers, patcherSettings, locals);
+            let r = records(filesToPatch, helpers, settings, locals);
             if (!patch) return;
             patcherProgress(`Patching ${r ? r.length : 0} ${label}`);
             r && r.forEach(record => {
                 let patchRecord = xelib.CopyElement(record, patchFile, false);
-                patch(patchRecord, helpers, patcherSettings, locals);
+                patch(patchRecord, helpers, settings, locals);
             });
         };
 
-        let executeBlock = function({init, load, records, label, patch}) {
-            if (init) init(patchFile, helpers, patcherSettings, locals);
+        let executeBlock = function({init, skip, load, records, label, patch}) {
+            if (skip && skip()) return;
+            if (init) init(patchFile, helpers, settings, locals);
             if (records) return recordsAndPatch(records, patch, label);
             if (load) loadAndPatch(load, patch);
         };
@@ -128,7 +130,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let initialize = function(exec) {
             patcherProgress('Initializing...');
             if (!exec.initialize) return;
-            exec.initialize(patchFile, helpers, patcherSettings, locals);
+            exec.initialize(patchFile, helpers, settings, locals);
         };
 
         let process = function(exec) {
@@ -139,12 +141,12 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let finalize = function(exec) {
             patcherProgress('Finalizing...');
             if (!exec.finalize) return;
-            exec.finalize(patchFile, helpers, patcherSettings, locals);
+            exec.finalize(patchFile, helpers, settings, locals);
         };
 
         let getExecutor = function() {
             return patcher.execute.constructor === Function ?
-                patcher.execute(patchFile, helpers, patcherSettings, locals) :
+                patcher.execute(patchFile, helpers, settings, locals) :
                 patcher.execute;
         };
 
@@ -152,7 +154,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         filesToPatch = patcherInfo.filesToPatch;
         patcher = patcherService.getPatcher(patcherId);
         helpers = getPatcherHelpers();
-        patcherSettings = patcherService.settings[patcherId];
+        settings = patcherService.settings[patcherId];
         executor = getExecutor();
         customProgress = executor.customProgress;
         if (customProgress)
