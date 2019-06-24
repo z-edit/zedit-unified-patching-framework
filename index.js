@@ -3,7 +3,7 @@ module.exports = function(args) {
         helpers = require('./src/helpers')(args),
         srcPath = fh.path(modulePath, 'src');
 
-    fh.find(srcPath, {
+    fh.getFiles(srcPath, {
         matching: '**/*.js'
     }).forEach(filePath => {
         let filename = fh.getFileName(filePath);
