@@ -1,4 +1,4 @@
-module.exports = ({ngapp}) =>
+module.exports = ({ngapp}, {openManagePatchersModal}) =>
 ngapp.run(function($rootScope, buttonService) {
     let managePatchersButton = {
         class: 'fa fa-puzzle-piece',
