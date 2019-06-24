@@ -1,4 +1,4 @@
-module.exports = function({ngapp}) {
+module.exports = function({ngapp, moduleUrl, fh}) {
     ngapp.service('patcherService', function($rootScope, $cacheFactory, settingsService) {
         const disabledHintBase =
             'This patcher is disabled because the following required' +
