@@ -2,9 +2,9 @@
   "id": "unifiedPatchingFramework",
   "name": "Unified Patching Framework",
   "author": "Mator",
-  "version": "1.5.1",
+  "version": "2.0.0",
   "repo": "https://github.com/matortheeternal/zedit-unified-patching-framework",
   "released": "9/7/2017",
-  "updated": "10/31/2018",
+  "updated": "6/24/2019",
   "description": "A framework for dynamic patchers, similar to SkyProc/SUM."
 }
