@@ -1,5 +1,8 @@
 module.exports = ({ngapp}) =>
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
+    let {FileByName, GetRecordFlag, GetPreviousOverride,
+         GetRecords, NameFromSignature, CopyElement} = xelib;
+
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
         let filesToPatch, customProgress, patcher, settings,
             helpers, locals = {};
@@ -16,20 +19,20 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let getFile = function(filename) {
             if (!cache[filename])
-                cache[filename] = { handle: xelib.FileByName(filename) };
+                cache[filename] = { handle: FileByName(filename) };
             return cache[filename];
         };
 
         let filterDeletedRecords = function(records) {
             if (settings.processDeletedRecords) return records;
             return records.filter(function(record) {
-                return !xelib.GetRecordFlag(record, 'Deleted');
+                return !GetRecordFlag(record, 'Deleted');
             });
         };
 
         let getPreviousOverrides = function(records) {
             return records.map(function(record) {
-                return xelib.GetPreviousOverride(record, patchFile);
+                return GetPreviousOverride(record, patchFile);
             });
         };
 
@@ -44,12 +47,13 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         };
 
         let getRecordsContext = function({signature, overrides}, filename) {
-            let recordType = xelib.NameFromSignature(signature);
+            let recordType = NameFromSignature(signature);
             if (overrides) recordType = `${recordType} override`;
             return `${recordType} records from ${filename}`;
         };
 
-        let loadRecords = function(filename, {signature, overrides}, recordsContext) {
+        let loadRecords = function(filename, loadOpts, recordsContext) {
+            let {signature, overrides} = loadOpts;
             patcherProgress(`Loading ${recordsContext}.`);
             return getRecords(filename, signature, overrides);
         };
@@ -80,7 +84,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 recordsContext = getRecordsContext(loadOpts, filename);
             patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
             recordsToPatch.forEach(function(record) {
-                let patchRecord = xelib.CopyElement(record, patchFile, false);
+                let patchRecord = CopyElement(record, patchFile, false);
                 patch(patchRecord, helpers, settings, locals);
             });
         };
@@ -94,7 +98,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                     }, []);
                 },
                 copyToPatch: function(rec, asNew = false) {
-                    return xelib.CopyElement(rec, patchFile, asNew);
+                    return CopyElement(rec, patchFile, asNew);
                 },
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
@@ -115,12 +119,13 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             if (!patch) return;
             patcherProgress(`Patching ${r ? r.length : 0} ${label}`);
             r && r.forEach(record => {
-                let patchRecord = xelib.CopyElement(record, patchFile, false);
+                let patchRecord = CopyElement(record, patchFile, false);
                 patch(patchRecord, helpers, settings, locals);
             });
         };
 
-        let executeBlock = function({init, skip, load, records, label, patch}) {
+        let executeBlock = function(block) {
+            let {init, skip, load, records, label, patch} = block;
             if (skip && skip()) return;
             if (init) init(patchFile, helpers, settings, locals);
             if (records) return recordsAndPatch(records, patch, label);
