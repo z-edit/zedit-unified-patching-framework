@@ -10,7 +10,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - Cell Encounter Level in Name - [github](https://github.com/z-edit/hishy-cell-encounter-level-in-name), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13542)
 - Khajiit Ears Show - [github](https://github.com/hishutup/hishy-khajiit-ears-show), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13544)
 - Enchantment Restriction Remover - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17370/)
-- Total Equipment Overhaul (TEO) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18157)
+- True Equipment Overhaul (TEO) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18157)
 - True Unleveled Skyrim (TUS) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18342)
 - Hunterborn Patcher - [github](https://www.nexusmods.com/skyrimspecialedition/mods/17993)
 - dualSheathRedux - [github](https://github.com/Qudix/dualSheathRedux)
