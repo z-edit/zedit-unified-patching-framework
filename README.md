@@ -39,6 +39,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - XP Editor - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/24356)
 - Limited Perk Trees - [nexus](https://www.nexusmods.com/skyrim/mods/95540)
 - Pick Your Poison - [nexus](https://www.nexusmods.com/skyrim/mods/96473)
+- Speed and Reach Fix - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/29847)
 
 ## installation
 
