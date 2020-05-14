@@ -40,6 +40,7 @@ ngapp.service('patchPluginWorker', function(progressService, patcherWorker) {
             if (!patcher.active) return;
             progressTitle(`Building ${patchFileName} ~ Running ${patcher.name}`);
             patcherWorker.run(cache, patchFileName, patchFile, patcher);
+            delete cache[patchFileName]
         });
         cleanPatchFile(patchFile);
         console.log(`Generated ${patchFileName} in ${new Date() - start}ms`);
