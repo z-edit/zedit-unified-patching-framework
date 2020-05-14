@@ -15,7 +15,9 @@ module.exports = function({ngapp, moduleUrl, fh}) {
         // private functions
         let getAvailableFiles = function(patcher) {
             let patchFileName = service.settings[patcher.info.id].patchFileName;
-            return xelib.GetLoadedFileNames().itemsBefore(patchFileName);
+            let patchFileNames = xelib.GetLoadedFileNames().itemsBefore(patchFileName);
+            patchFileNames.push(patchFileName);
+            return patchFileNames;
         };
 
         let getPatcherEnabled = function(patcher) {
