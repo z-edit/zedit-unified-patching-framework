@@ -98,12 +98,9 @@ module.exports = function({ngapp, moduleUrl, fh}) {
         };
 
         this.reloadPatchers = function() {
-            let patcherIds = patchers.map(patcher => patcher.info.id);
+            let patcherPaths = patchers.map(patcher => patcher.info.path);
             patchers = [];
-            patcherIds.forEach(id => {
-                let patcherPath = fh.jetpack.path(`modules\\${id}`);
-                moduleService.loadModule(patcherPath);
-            });
+            patcherPaths.forEach(moduleService.loadModule);
         };
 
         this.updateForGameMode = function(gameMode) {
