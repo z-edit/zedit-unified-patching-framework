@@ -1,3 +1,4 @@
+module.exports = ({ngapp}) =>
 ngapp.controller('buildPatchesController', function($scope, $q, patcherService, patchBuilder) {
     // helper functions
     let getUsedFileNames = function() {

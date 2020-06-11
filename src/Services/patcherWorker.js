@@ -1,6 +1,10 @@
+module.exports = ({ngapp}) =>
 ngapp.service('patcherWorker', function(patcherService, progressService, idCacheService, interApiService) {
+    let {FileByName, GetRecordFlag, GetPreviousOverride,
+         GetRecords, NameFromSignature, CopyElement} = xelib;
+
     this.run = function(cache, patchFileName, patchFile, patcherInfo) {
-        let filesToPatch, customProgress, patcher, patcherSettings,
+        let filesToPatch, customProgress, patcher, settings,
             helpers, locals = {};
 
         // helper functions
@@ -15,20 +19,20 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let getFile = function(filename) {
             if (!cache[filename])
-                cache[filename] = { handle: xelib.FileByName(filename) };
+                cache[filename] = { handle: FileByName(filename) };
             return cache[filename];
         };
 
         let filterDeletedRecords = function(records) {
-            if (patcherSettings.processDeletedRecords) return records;
+            if (settings.processDeletedRecords) return records;
             return records.filter(function(record) {
-                return !xelib.GetRecordFlag(record, 'Deleted');
+                return !GetRecordFlag(record, 'Deleted');
             });
         };
 
         let getPreviousOverrides = function(records) {
             return records.map(function(record) {
-                return xelib.GetPreviousOverride(record, patchFile);
+                return GetPreviousOverride(record, patchFile);
             });
         };
 
@@ -36,19 +40,18 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             let file = getFile(filename),
                 cacheKey = `${search}_${+overrides}`;
             if (!file[cacheKey])
-                file[cacheKey] = filterDeletedRecords(getPreviousOverrides(
-                    xelib.GetRecords(file.handle, search, overrides)
-                ));
-            return file[cacheKey];
+                file[cacheKey] = GetRecords(file.handle, search, overrides);
+            return filterDeletedRecords(getPreviousOverrides(file[cacheKey]));
         };
 
         let getRecordsContext = function({signature, overrides}, filename) {
-            let recordType = xelib.NameFromSignature(signature);
+            let recordType = NameFromSignature(signature);
             if (overrides) recordType = `${recordType} override`;
             return `${recordType} records from ${filename}`;
         };
 
-        let loadRecords = function(filename, {signature, overrides}, recordsContext) {
+        let loadRecords = function(filename, loadOpts, recordsContext) {
+            let {signature, overrides} = loadOpts;
             patcherProgress(`Loading ${recordsContext}.`);
             return getRecords(filename, signature, overrides);
         };
@@ -60,7 +63,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let getLoadOpts = function(load, plugin) {
             return load.constructor === Function ?
-                load(plugin, helpers, patcherSettings, locals) : load;
+                load(plugin, helpers, settings, locals) : load;
         };
 
         let getRecordsToPatch = function(load, filename) {
@@ -79,8 +82,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                 recordsContext = getRecordsContext(loadOpts, filename);
             patcherProgress(`Patching ${recordsToPatch.length} ${recordsContext}`);
             recordsToPatch.forEach(function(record) {
-                let patchRecord = xelib.CopyElement(record, patchFile, false);
-                patch(patchRecord, helpers, patcherSettings, locals);
+                let patchRecord = CopyElement(record, patchFile, false);
+                patch(patchRecord, helpers, settings, locals);
             });
         };
 
@@ -93,7 +96,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
                     }, []);
                 },
                 copyToPatch: function(rec, asNew = false) {
-                    return xelib.CopyElement(rec, patchFile, asNew);
+                    return CopyElement(rec, patchFile, asNew);
                 },
                 allSettings: patcherService.settings,
                 logMessage: logMessage,
@@ -110,17 +113,19 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
 
         let recordsAndPatch = function(records, patch, label = 'records') {
             patcherProgress(`Getting ${label}`);
-            let r = records(filesToPatch, helpers, patcherSettings, locals);
+            let r = records(filesToPatch, helpers, settings, locals);
             if (!patch) return;
             patcherProgress(`Patching ${r ? r.length : 0} ${label}`);
             r && r.forEach(record => {
-                let patchRecord = xelib.CopyElement(record, patchFile, false);
-                patch(patchRecord, helpers, patcherSettings, locals);
+                let patchRecord = CopyElement(record, patchFile, false);
+                patch(patchRecord, helpers, settings, locals);
             });
         };
 
-        let executeBlock = function({init, load, records, label, patch}) {
-            if (init) init(patchFile, helpers, patcherSettings, locals);
+        let executeBlock = function(block) {
+            let {init, skip, load, records, label, patch} = block;
+            if (skip && skip()) return;
+            if (init) init(patchFile, helpers, settings, locals);
             if (records) return recordsAndPatch(records, patch, label);
             if (load) loadAndPatch(load, patch);
         };
@@ -128,7 +133,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let initialize = function(exec) {
             patcherProgress('Initializing...');
             if (!exec.initialize) return;
-            exec.initialize(patchFile, helpers, patcherSettings, locals);
+            exec.initialize(patchFile, helpers, settings, locals);
         };
 
         let process = function(exec) {
@@ -139,12 +144,12 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         let finalize = function(exec) {
             patcherProgress('Finalizing...');
             if (!exec.finalize) return;
-            exec.finalize(patchFile, helpers, patcherSettings, locals);
+            exec.finalize(patchFile, helpers, settings, locals);
         };
 
         let getExecutor = function() {
             return patcher.execute.constructor === Function ?
-                patcher.execute(patchFile, helpers, patcherSettings, locals) :
+                patcher.execute(patchFile, helpers, settings, locals) :
                 patcher.execute;
         };
 
@@ -152,7 +157,7 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
         filesToPatch = patcherInfo.filesToPatch;
         patcher = patcherService.getPatcher(patcherId);
         helpers = getPatcherHelpers();
-        patcherSettings = patcherService.settings[patcherId];
+        settings = patcherService.settings[patcherId];
         executor = getExecutor();
         customProgress = executor.customProgress;
         if (customProgress)

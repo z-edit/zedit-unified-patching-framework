@@ -1,3 +1,4 @@
+module.exports = ({ngapp}) =>
 ngapp.service('idCacheService', function(patcherService) {
     let prepareIdCache = function(patchFile) {
         let cache = patcherService.cache,

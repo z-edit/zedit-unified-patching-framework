@@ -1,3 +1,4 @@
+module.exports = ({ngapp}) =>
 ngapp.controller('managePatchersModalController', function($scope, patcherService) {
     // helper functions
     let selectTab = function(tab) {

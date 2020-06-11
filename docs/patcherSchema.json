@@ -145,6 +145,16 @@
         "itemsLabel": "Process Block Schema",
         "items": [
           {
+            "name": "skip",
+            "type": "function",
+            "icons": ["optional"],
+            "args": [],
+            "returns": {
+              "type": "boolean"
+            },
+            "description": "Skip function.  Called to determine whether or not the process block should be skipped.  Return true to skip the process block."
+          },
+          {
             "name": "load",
             "type": "object",
             "description": "Loaded records which pass `filter` will be copied to the patch plugin, and then passed to the `patch` function.",

@@ -1,3 +1,4 @@
+module.exports = ({ngapp}) =>
 ngapp.controller('upfSettingsController', function($timeout, $scope) {
     $scope.bannerStyle = {
         'background': `url('${moduleUrl}/images/banner.jpg')`,
