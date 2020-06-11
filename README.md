@@ -4,6 +4,7 @@ A zEdit module which provides a framework for dynamic patch generation, similar 
 ## patchers
 Check out the following patchers to get an idea of how to use UPF:
 
+- Example Patcher - [github](https://github.com/z-edit/zedit-example-patcher)
 - Action Speed - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/35097)
 - Animated Armory - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/25969)
 - Cell Encounter Level in Name - [github](https://github.com/z-edit/hishy-cell-encounter-level-in-name), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13542)
@@ -12,7 +13,6 @@ Check out the following patchers to get an idea of how to use UPF:
 - ENB Light Patcher - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/22574)
 - Enchantment Restriction Remover - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17370/)
 - Engarde - [nexus](https://www.nexusmods.com/skyrim/mods/97404)
-- Example Patcher - [github](https://github.com/z-edit/zedit-example-patcher)
 - Experience Mod - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/23589)
 - Fallout Genetics - everyone is beautiful - [nexus](https://www.nexusmods.com/fallout4/mods/35459)
 - Hunterborn Patcher - [github](https://www.nexusmods.com/skyrimspecialedition/mods/17993)
@@ -32,11 +32,14 @@ Check out the following patchers to get an idea of how to use UPF:
 - Pra's zEdit Patchers - [nexus](https://www.nexusmods.com/fallout4/mods/33858)
 - Randomized Birthstones Skyrim - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/23838)
 - Reproccer Reborn - [github](https://github.com/jdsmith2816/reproccer-reborn), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17913)
+- Save Your Finger - [nexus](https://www.nexusmods.com/fallout4/mods/38781)
 - Skyrim Material Patcher - [github](https://github.com/z-edit/zedit-skyrim-material-patcher)
 - SORT - Scripted Overrides that Rename Things - [nexus](https://www.nexusmods.com/skyrim/mods/87820/)
 - Speed and Reach Fix - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/29847)
 - True Equipment Overhaul (TEO) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18157)
 - True Unleveled Skyrim (TUS) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18342)
+- XP Editor - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/24356)
+- zEdit patchers warehouse - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/23254)
 
 ## installation
 
