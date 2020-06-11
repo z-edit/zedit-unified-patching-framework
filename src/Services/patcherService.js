@@ -6,11 +6,16 @@ module.exports = function({ngapp, moduleUrl, fh}) {
 
         let service = this,
             patchers = [],
+            tabs = [];
+
+        this.resetTabs = function () {
             tabs = [{
                 label: 'Build Patches',
                 templateUrl: `${moduleUrl}/partials/buildPatches.html`,
                 controller: 'buildPatchesController'
             }];
+        }
+        this.resetTabs();
 
         // private functions
         let getAvailableFiles = function(patcher) {
@@ -187,6 +192,7 @@ module.exports = function({ngapp, moduleUrl, fh}) {
                 $cacheFactory.get('templates').remove(tab.templateUrl);
             });
             tabs = [];
+            service.resetTabs();
             service.reloadPatchers();
             service.loadSettings();
         });
