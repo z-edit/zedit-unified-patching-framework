@@ -14,6 +14,7 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
 
     let getProcessSize = function(process, files) {
         return process.reduce((sum, block) => {
+            if (block.skip && block.skip()) return sum;
             let patch = block.patch ? 1 : 0;
             if (block.records) return sum + 1 + patch;
             if (block.load) return sum + files.length * (2 + patch);
