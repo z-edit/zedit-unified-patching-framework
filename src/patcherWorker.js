@@ -36,10 +36,8 @@ ngapp.service('patcherWorker', function(patcherService, progressService, idCache
             let file = getFile(filename),
                 cacheKey = `${search}_${+overrides}`;
             if (!file[cacheKey])
-                file[cacheKey] = filterDeletedRecords(getPreviousOverrides(
-                    xelib.GetRecords(file.handle, search, overrides)
-                ));
-            return file[cacheKey];
+                file[cacheKey] = xelib.GetRecords(file.handle, search, overrides);
+            return filterDeletedRecords(getPreviousOverrides(file[cacheKey]));
         };
 
         let getRecordsContext = function({signature, overrides}, filename) {
