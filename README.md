@@ -4,7 +4,20 @@ A zEdit module which provides a framework for dynamic patch generation, similar 
 ## patchers
 Check out the following patchers to get an idea of how to use UPF:
 
+### Shared / General
 - Example Patcher - [github](https://github.com/z-edit/zedit-example-patcher)
+
+### Fallout 4
+- Pra's zEdit Patchers - [nexus](https://www.nexusmods.com/fallout4/mods/33858)
+- Fallout Genetics - everyone is beautiful - [nexus](https://www.nexusmods.com/fallout4/mods/35459)
+- Save Your Finger - [nexus](https://www.nexusmods.com/fallout4/mods/38781)
+- No Lowered Suppressor and Bayonet Range - [nexus](https://www.nexusmods.com/fallout4/mods/38817)
+- No Lowered Automatic Weapon Damage - [nexus](https://www.nexusmods.com/fallout4/mods/38805)
+- Cherrys New Calibers Patcher  - [nexus](https://www.nexusmods.com/fallout4/mods/46059)
+- Cherry's Damage Threshold Framework Patcher - [nexus](https://www.nexusmods.com/fallout4/mods/46358)
+- No Exterior Lights [nexus](https://www.nexusmods.com/fallout4/mods/34210)
+
+### Skyrim
 - No Dragon LODs - [github](https://github.com/hishutup/hishy-no-dragon-lods), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13541/)
 - NPC Enchant Fix - [github](https://github.com/z-edit/hishy-npc-enchant-fix), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13543)
 - Cell Encounter Level in Name - [github](https://github.com/z-edit/hishy-cell-encounter-level-in-name), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13542)
@@ -19,7 +32,6 @@ Check out the following patchers to get an idea of how to use UPF:
 - Know Your Enemy - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13807)
 - Reproccer Reborn - [github](https://github.com/jdsmith2816/reproccer-reborn), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17913)
 - Skyrim Material Patcher - [github](https://github.com/z-edit/zedit-skyrim-material-patcher)
-- Pra's zEdit Patchers - [nexus](https://www.nexusmods.com/fallout4/mods/33858)
 - SORT - Scripted Overrides that Rename Things - [nexus](https://www.nexusmods.com/skyrim/mods/87820/)
 - Know Your Enemy - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/13807)
 - Randomized Birthstones Skyrim - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/23838)
@@ -28,12 +40,8 @@ Check out the following patchers to get an idea of how to use UPF:
 - zEdit patchers warehouse - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/23254)
 - ENB Light Patcher - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/22574)
 - Keys Have Weight - [nexus](https://www.nexusmods.com/skyrim/mods/95168)
-- Fallout Genetics - everyone is beautiful - [nexus](https://www.nexusmods.com/fallout4/mods/35459)
 - No Distant LOD for NPCs - [nexus](https://www.nexusmods.com/skyrim/mods/95175)
 - Animated Armory - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/25969)
-- Save Your Finger - [nexus](https://www.nexusmods.com/fallout4/mods/38781)
-- No Lowered Suppressor and Bayonet Range - [nexus](https://www.nexusmods.com/fallout4/mods/38817)
-- No Lowered Automatic Weapon Damage - [nexus](https://www.nexusmods.com/fallout4/mods/38805)
 - NPC Stat Rescaler - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/24254)
 - Challenging Spell Learning - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/20521)
 - XP Editor - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/24356)
@@ -49,4 +57,4 @@ Check out the following patchers to get an idea of how to use UPF:
 3. Run zEdit.
 
 ## dev notes
-The `dist` branch contains the `dist` subtree, allowing it to be a submodule of the [zEdit](https://github.com/matortheeternal/zedit) repo.  The branch can be updated by running the command `git subtree split --branch dist --prefix dist/` on master. 
+The `dist` branch contains the `dist` subtree, allowing it to be a submodule of the [zEdit](https://github.com/matortheeternal/zedit) repo.  The branch can be updated by running the command `git subtree split --branch dist --prefix dist/` on master.
