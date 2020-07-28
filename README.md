@@ -25,7 +25,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - Enchantment Restriction Remover - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17370/)
 - True Equipment Overhaul (TEO) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18157)
 - True Unleveled Skyrim (TUS) - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18342)
-- Hunterborn Patcher - [github](https://www.nexusmods.com/skyrimspecialedition/mods/17993)
+- Hunterborn Patcher - [github](https://github.com/Hazado/Hunterborn-Creature-Patcher), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/17993)
 - dualSheathRedux - [github](https://github.com/Qudix/dualSheathRedux)
 - loadScreenRemover - [github](https://github.com/Qudix/loadScreenRemover), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18279/)
 - oppositeAnimationDisabler - [github](https://github.com/Qudix/oppositeAnimationDisabler), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/18281)
@@ -49,6 +49,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - Pick Your Poison - [nexus](https://www.nexusmods.com/skyrim/mods/96473)
 - Speed and Reach Fix - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/29847)
 - Action Speed - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/35097)
+- Breakdown Recipe Generator - [github](https://github.com/Hazado/breakdownRecipeBuilder), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/38273/)
 
 ## installation
 
