@@ -5,8 +5,12 @@ ngapp.service('patchBuilder', function($rootScope, $timeout, patcherService, pat
     let build = (patchPlugin) => patchPluginWorker.run(cache, patchPlugin);
 
     let getExecutor = function(patcher) {
-        return patcher.execute.constructor === Function ?
-            patcher.execute(0, {}, {}, {}) : patcher.execute;
+        let helpers = {},
+            settings = patcherService.settings[patcher.id],
+            locals = {};
+        return patcher.execute.constructor === Function
+            ? patcher.execute(0, helpers, settings, locals)
+            : patcher.execute;
     };
 
     let getProcessSize = function(process, files) {
