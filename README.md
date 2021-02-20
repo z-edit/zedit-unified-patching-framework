@@ -48,6 +48,7 @@ Check out the following patchers to get an idea of how to use UPF:
 - Limited Perk Trees - [nexus](https://www.nexusmods.com/skyrim/mods/95540)
 - Pick Your Poison - [nexus](https://www.nexusmods.com/skyrim/mods/96473)
 - Speed and Reach Fix - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/29847)
+- Enemy Releveler - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/32211)
 - Action Speed - [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/35097)
 - Breakdown Recipe Generator - [github](https://github.com/Hazado/breakdownRecipeBuilder), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/38273)
 - The Alchemist's Cookbook - [github](https://github.com/epic-crab/zedit-potion-recipes-patcher), [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/45866)
