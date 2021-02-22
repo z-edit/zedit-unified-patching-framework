@@ -6,11 +6,16 @@ module.exports = function({ngapp, moduleUrl, fh}) {
 
         let service = this,
             patchers = [],
+            tabs = [];
+
+        this.resetTabs = function () {
             tabs = [{
                 label: 'Build Patches',
                 templateUrl: `${moduleUrl}/partials/buildPatches.html`,
                 controller: 'buildPatchesController'
             }];
+        }
+        this.resetTabs();
 
         // private functions
         let getAvailableFiles = function(patcher) {
@@ -93,12 +98,9 @@ module.exports = function({ngapp, moduleUrl, fh}) {
         };
 
         this.reloadPatchers = function() {
-            let patcherIds = patchers.map(patcher => patcher.info.id);
+            let patcherPaths = patchers.map(patcher => patcher.info.path);
             patchers = [];
-            patcherIds.forEach(id => {
-                let patcherPath = fh.jetpack.path(`modules\\${id}`);
-                moduleService.loadModule(patcherPath);
-            });
+            patcherPaths.forEach(moduleService.loadModule);
         };
 
         this.updateForGameMode = function(gameMode) {
@@ -187,6 +189,7 @@ module.exports = function({ngapp, moduleUrl, fh}) {
                 $cacheFactory.get('templates').remove(tab.templateUrl);
             });
             tabs = [];
+            service.resetTabs();
             service.reloadPatchers();
             service.loadSettings();
         });

@@ -3,6 +3,8 @@ module.exports = function({moduleService, ngapp}) {
 
     ngapp.run(function($rootScope, patcherService) {
         let upfLoader = function({module, fh, moduleService}) {
+            // save the path for if we need to reload later.
+            module.info.path = module.path;
             moduleService.executeModule(module, {
                 registerPatcher: patcherService.registerPatcher,
                 fh: fh,
